@@ -100,46 +100,48 @@ footer {
 [data-testid="stHeader"] {
   visibility: visible !important;
   background: transparent !important;
-  height: auto !important;
+  z-index: 100000 !important;
 }
 
 [data-testid="stToolbar"] {
-  visibility: hidden;
+  display: none !important;
 }
 
-/* Sidebar Kapatıldığında Sol Üstte Beliren "Sidebar'ı Aç" Butonunu Vurgula ve Sabitle */
+/* Sidebar kapalıyken sol üstte beliren açma butonu */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="stSidebarToggleButton"],
-[data-testid="collapsedControl"],
-button[aria-label="Expand sidebar"],
-button[aria-label="Open sidebar"] {
+[data-testid="collapsedControl"] {
+  display: block !important;
   visibility: visible !important;
-  display: flex !important;
-  position: fixed !important;
-  top: 14px !important;
-  left: 14px !important;
-  z-index: 999999 !important;
+  z-index: 100001 !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stSidebarToggleButton"] button,
+[data-testid="collapsedControl"] button,
+[data-testid="stSidebarCollapsedControl"] button *,
+[data-testid="stSidebarToggleButton"] button *,
+[data-testid="collapsedControl"] button * {
+  visibility: visible !important;
+  color: #2563EB !important;
+  fill: #2563EB !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stSidebarToggleButton"] button,
+[data-testid="collapsedControl"] button {
   background-color: #FFFFFF !important;
   border: 1.5px solid #2563EB !important;
   border-radius: 8px !important;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
-  padding: 6px 10px !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2) !important;
+  padding: 4px 8px !important;
 }
 
-[data-testid="stSidebarCollapsedControl"]:hover,
-[data-testid="stSidebarToggleButton"]:hover,
-[data-testid="collapsedControl"]:hover {
+[data-testid="stSidebarCollapsedControl"] button:hover,
+[data-testid="stSidebarToggleButton"] button:hover,
+[data-testid="collapsedControl"] button:hover {
   background-color: #EFF6FF !important;
-  transform: scale(1.05) !important;
   border-color: #1D4ED8 !important;
-}
-
-[data-testid="stSidebarCollapsedControl"] svg,
-[data-testid="stSidebarToggleButton"] svg {
-  fill: #2563EB !important;
-  color: #2563EB !important;
 }
 
 [data-testid="stSidebar"] {
