@@ -39,60 +39,15 @@ def _render_brand(container=st):
 def render_navbar():
     """
     Ana giriş noktası. app.py bu fonksiyonu her sayfa yüklemesinde çağırır.
-    İsim geriye dönük uyumluluk için 'render_navbar' korunmuştur
-    (app.py içindeki import satırı değişmeden çalışsın diye).
     """
-    is_auth = st.session_state.get("is_authenticated", False)
-
-    if not is_auth:
-        current_page = SessionManager.get_current_page()
-        if current_page == "landing":
-            _render_landing_header()
-        else:
-            _render_fullscreen_header()
-        return
-
     _render_sidebar()
     _render_leave_interview_dialog()
 
 
-def _render_landing_header():
-    """
-    Landing (pazarlama) sayfası için üst çubuk.
-    React'teki Navbar.jsx: solda logo, sağda Giriş Yap / Ücretsiz Başla.
-    """
-    col_brand, col_spacer, col_login, col_register = st.columns([3, 3, 1, 1.4])
-    with col_brand:
-        _render_brand()
-    with col_login:
-        if st.button("Giriş Yap", key="topnav_login", use_container_width=True):
-            SessionManager.navigate_to("login")
-    with col_register:
-        if st.button(
-            "Ücretsiz Başla",
-            key="topnav_register",
-            use_container_width=True,
-            type="primary",
-        ):
-            SessionManager.navigate_to("register")
-    st.divider()
-
-
-def _render_fullscreen_header():
-    """
-    Login / Register ekranları için üst başlık.
-    React FullscreenLayout: sidebar yok, ortalanmış küçük logo.
-    """
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        _render_brand()
-    st.divider()
-
-
 def _render_sidebar():
-    """Oturum açık kullanıcılar için kalıcı sol navigasyon."""
+    """Kalıcı sol navigasyon."""
     current_page = SessionManager.get_current_page()
-    user = st.session_state.user
+    user = st.session_state.get("user", {})
 
     with st.sidebar:
         _render_brand()
@@ -107,6 +62,7 @@ def _render_sidebar():
                 use_container_width=True,
                 type="primary" if is_active else "secondary",
             ):
+                st.session_state.is_authenticated = True
                 SessionManager.request_navigation(page_key)
 
         st.divider()
