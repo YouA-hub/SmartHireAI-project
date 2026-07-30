@@ -34,7 +34,7 @@ def render():
 
     with col_info:
         st.subheader(user.get("name", "Kullanıcı"))
-        st.caption(user.get("role", "Aday"))
+        st.caption(cv_data.get("position", "Pozisyon belirtilmedi"))
         st.write(user.get("email", ""))
 
     st.divider()
@@ -46,9 +46,6 @@ def render():
 
         with col1:
             new_name = st.text_input("Ad Soyad", value=user.get("name", ""))
-            new_role = st.text_input(
-                "Hedeflenen Rol", value=user.get("role", "")
-            )
 
         with col2:
             new_email = st.text_input("E-posta", value=user.get("email", ""))
@@ -63,7 +60,6 @@ def render():
 
         if submitted:
             user["name"] = new_name
-            user["role"] = new_role
             user["email"] = new_email
             user["avatar_initials"] = "".join(
                 part[0].upper() for part in new_name.split()[:2]

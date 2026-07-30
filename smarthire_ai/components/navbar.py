@@ -73,13 +73,14 @@ def _render_sidebar():
         st.divider()
 
         # --- Kullanıcı kartı ---
+        cv_data = st.session_state.get("cv_data", {})
         with st.container(border=True):
             col_avatar, col_info = st.columns([1, 3])
             with col_avatar:
                 st.markdown(f"**{user.get('avatar_initials', 'U')}**")
             with col_info:
                 st.caption(f"**{user.get('name', 'Kullanıcı')}**")
-                st.caption(user.get("role", "Aday"))
+                st.caption(cv_data.get("position", "Aday"))
 
         if st.button("🚪 Çıkış Yap", key="sidebar_logout", use_container_width=True):
             SessionManager.request_logout()

@@ -55,7 +55,6 @@ class SessionManager:
             st.session_state.user = {
                 "name": "Senan Aliyev",
                 "email": "senan@example.com",
-                "role": "Frontend Developer Adayı",
                 "avatar_initials": "SA"
             }
 
