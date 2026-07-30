@@ -23,7 +23,13 @@ if not GEMINI_API_KEY:
     )
 
 # MODEL
-MODEL_NAME = os.getenv(
-    "GEMINI_MODEL",
-    "gemini-2.5-flash"
-)
+MODEL_NAME = os.getenv("GEMINI_MODEL")
+
+if not MODEL_NAME:
+    try:
+        MODEL_NAME = st.secrets.get("GEMINI_MODEL")
+    except Exception:
+        pass
+
+if not MODEL_NAME:
+    MODEL_NAME = "gemini-3.5-flash-lite"
