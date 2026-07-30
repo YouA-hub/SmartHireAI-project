@@ -25,6 +25,15 @@
       "hireability_rate": 29,
       "cv_match_score": 65,
       "question_count": 5
+    },
+    {
+      "session_id": "217f8eb5",
+      "date": "30.07.2026",
+      "position": "veri analisti",
+      "readiness_score": 6,
+      "hireability_rate": 27,
+      "cv_match_score": 65,
+      "question_count": 5
     }
   ]
 }
