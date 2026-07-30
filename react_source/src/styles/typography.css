@@ -1,0 +1,74 @@
+/* ============================================================
+   SmartHire AI — Typography
+   Font: Inter (loaded via index.html Google Fonts)
+   Weights: 400 (normal) ve 500 (medium) ONLY — 700 yasak
+   ============================================================ */
+
+/* Heading levels */
+.text-h1 {
+  font-size: var(--text-h1);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-heading);
+  color: var(--color-text-primary);
+}
+
+.text-h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-heading);
+  color: var(--color-text-primary);
+}
+
+.text-h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-heading);
+  color: var(--color-text-primary);
+}
+
+/* Body text */
+.text-body {
+  font-size: var(--text-body);
+  font-weight: var(--weight-normal);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+}
+
+.text-small {
+  font-size: var(--text-small);
+  font-weight: var(--weight-normal);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.text-caption {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-normal);
+  line-height: var(--lh-body);
+  color: var(--color-muted);
+}
+
+/* Color utilities */
+.text-primary    { color: var(--color-text-primary); }
+.text-secondary  { color: var(--color-text-secondary); }
+.text-muted      { color: var(--color-muted); }
+.text-success    { color: var(--color-success-text); }
+.text-warning    { color: var(--color-warning-text); }
+.text-danger     { color: var(--color-danger-text); }
+.text-accent     { color: var(--color-primary); }
+
+/* Weight utilities */
+.font-normal  { font-weight: var(--weight-normal); }
+.font-medium  { font-weight: var(--weight-medium); }
+
+/* Alignment */
+.text-left    { text-align: left; }
+.text-center  { text-align: center; }
+.text-right   { text-align: right; }
+
+/* Truncation */
+.text-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,240 @@
+/* ================================================
+   PDF Report Page Styles
+   ================================================ */
+
+.pdf-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  font-family: var(--font-family);
+}
+
+/* ---- Preview ---- */
+.pdf-preview {
+  background: var(--color-card);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-card);
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ---- Header ---- */
+.pdf-preview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.pdf-preview__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-body);
+  font-weight: 600;
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pdf-preview__meta {
+  text-align: right;
+}
+
+.pdf-preview__meta p {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.pdf-preview__meta p:first-child {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* ---- Score section ---- */
+.pdf-preview__score-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.pdf-score-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pdf-score-label {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.pdf-score-value {
+  font-size: 40px;
+  font-weight: 600;
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.pdf-score-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.pdf-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pdf-stat__label {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.pdf-stat__value {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* ---- Divider ---- */
+.pdf-preview__divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ---- Section ---- */
+.pdf-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pdf-section__title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Categories ---- */
+.pdf-categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pdf-cat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pdf-cat__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pdf-cat__label {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+.pdf-cat__val {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* ---- Two col ---- */
+.pdf-preview__two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+/* ---- List ---- */
+.pdf-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pdf-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+
+.pdf-list--success li svg {
+  color: var(--color-success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pdf-list--warning li svg {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ---- Footer ---- */
+.pdf-preview__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pdf-preview__footer p {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ---- Print styles ---- */
+@media print {
+  .pdf-report > :not(.pdf-preview) {
+    display: none;
+  }
+  .pdf-preview {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .pdf-preview {
+    padding: var(--space-5);
+  }
+  .pdf-preview__score-section {
+    grid-template-columns: 1fr;
+  }
+  .pdf-preview__two-col {
+    grid-template-columns: 1fr;
+  }
+}

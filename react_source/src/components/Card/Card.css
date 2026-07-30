@@ -1,0 +1,100 @@
+/* ============================================================
+   Card — Spec §2.2
+   İki tip:
+   1. Standart kart: beyaz zemin, 12px radius, 0.5px border, 16-24px padding
+   2. Metrik kartı: özet sayı gösterimi, üstte 13px muted label
+   ============================================================ */
+
+.card {
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  border: var(--border-thin);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Padding variants */
+.card--pad-sm  { padding: var(--space-3); }
+.card--pad-md  { padding: var(--space-5); }  /* default */
+.card--pad-lg  { padding: var(--space-6); }
+
+/* No border variant */
+.card--borderless {
+  border: none;
+  box-shadow: none;
+}
+
+/* Gradient card — hazırlık skoru kartı (spec'e göre izinli) */
+.card--gradient {
+  background: var(--gradient-main);
+  color: #ffffff;
+  border: none;
+}
+
+/* Metric card — özet sayı gösterimi */
+.card--metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.card__metric-label {
+  font-size: var(--text-small);
+  font-weight: var(--weight-normal);
+  color: var(--color-muted);
+  line-height: var(--lh-body);
+}
+
+.card__metric-value {
+  font-size: 28px;
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+.card--gradient .card__metric-label {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.card--gradient .card__metric-value {
+  color: #ffffff;
+}
+
+.card__metric-sub {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
+.card--gradient .card__metric-sub {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Header / Body / Footer */
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.card__title {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+}
+
+.card--gradient .card__title {
+  color: #ffffff;
+}
+
+.card__body {
+  flex: 1;
+}
+
+.card__footer {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--border-thin);
+}

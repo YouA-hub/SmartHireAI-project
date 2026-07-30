@@ -1,0 +1,68 @@
+/* ================================================
+   Interview History Page Styles
+   ================================================ */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  font-family: var(--font-family);
+}
+
+.hist-date {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.hist-position {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.hist-company {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin: 2px 0 0;
+}
+
+.hist-questions {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.hist-actions {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.hist-action-btn {
+  width: 30px;
+  height: 30px;
+  border: var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-hover) var(--easing-default);
+}
+
+.hist-action-btn:hover {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.history__pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-4);
+  border-top: var(--border-thin);
+  margin-top: var(--space-4);
+}

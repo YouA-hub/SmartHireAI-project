@@ -1,0 +1,81 @@
+/* ============================================================
+   ProgressBar — Spec §2.5
+   - Tek bileşen, iki prop: value (0-100) ve animated (boolean)
+   - animated=true → 0'dan hedef değere ease-out 2-2.5s
+   - Yüzde yazısı barın içinde sağa hizalı
+   - Yükseklik context'e göre: 6px (ince liste barı) / 56px (ana skor barı)
+   - Gradient dolgu — spec'te izinli skor barı kullanımı
+   ============================================================ */
+
+.progress-bar {
+  width: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-border);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Height variants */
+.progress-bar--thin  { height: 6px; }   /* liste içi ince bar */
+.progress-bar--base  { height: 12px; }  /* orta boy */
+.progress-bar--large { height: 56px; }  /* ana skor barı */
+
+.progress-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-main);
+  position: relative;
+
+  /* Başlangıç: animasyonsuz */
+  width: var(--target-width, 0%);
+  transition: width var(--duration-hover) var(--easing-default);
+}
+
+/* Animated fill: 0'dan hedef değere */
+.progress-bar__fill--animated {
+  width: 0%;
+  animation: fillProgress var(--duration-score) var(--easing-score) forwards;
+}
+
+@keyframes fillProgress {
+  from { width: 0%; }
+  to   { width: var(--target-width, 0%); }
+}
+
+/* Percentage label — sadece large ve base modunda */
+.progress-bar__label {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.progress-bar--thin .progress-bar__label {
+  display: none;
+}
+
+/* Segment label above bar */
+.progress-bar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.progress-bar__segment-label {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+.progress-bar__segment-value {
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}

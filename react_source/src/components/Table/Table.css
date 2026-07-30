@@ -1,0 +1,70 @@
+/* Table */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body);
+}
+
+.table th {
+  padding: var(--space-2) var(--space-4);
+  text-align: left;
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  color: var(--color-muted);
+  border-bottom: var(--border-default);
+  background: var(--color-bg);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-thin);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background var(--duration-hover) var(--easing-default);
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-bg);
+}
+
+.table tbody tr.table__row--clickable {
+  cursor: pointer;
+}
+
+/* Column alignment */
+.table th.align-right,
+.table td.align-right {
+  text-align: right;
+}
+
+.table th.align-center,
+.table td.align-center {
+  text-align: center;
+}
+
+/* Actions column */
+.table__actions-head {
+  width: 80px;
+  text-align: right;
+}
+
+.table__actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}

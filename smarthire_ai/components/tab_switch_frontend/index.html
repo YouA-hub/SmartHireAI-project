@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <script>
+        /*
+         * SmartHire AI - Sekme/Pencere/Site Değişikliği Algılayıcı
+         *
+         * Bu dosya, Streamlit'in resmi "Bidirectional Component" postMessage
+         * sözleşmesinin minimal, bağımsız (harici paket gerektirmeyen) bir
+         * uygulamasıdır. Amaç: kullanıcı mülakat sırasında başka bir sekmeye,
+         * pencereye veya siteye geçtiğinde bunu ANINDA Python tarafına
+         * (st.session_state) bildirmek.
+         *
+         * NOT: Eski yaklaşım (components.html + window.parent.location.href ile
+         * sayfa yönlendirme) Streamlit'in bileşen iframe'i "sandbox"lı olduğu
+         * için (allow-top-navigation izni YOK) tarayıcı tarafından sessizce
+         * engelleniyordu. postMessage ise sandbox tarafından ASLA engellenmez,
+         * bu yüzden bu yöntem güvenilir çalışır.
+         */
+        (function () {
+            function sendToStreamlit(type, extra) {
+                var payload = Object.assign(
+                    { isStreamlitMessage: true, type: type },
+                    extra || {}
+                );
+                window.parent.postMessage(payload, "*");
+            }
+
+            function setComponentValue(value) {
+                sendToStreamlit("streamlit:setComponentValue", {
+                    value: value,
+                    dataType: "json",
+                });
+            }
+
+            function setFrameHeight(height) {
+                sendToStreamlit("streamlit:setFrameHeight", { height: height });
+            }
+
+            // Streamlit'e bileşenin yüklendiğini bildir (protokol gereği ilk adım).
+            sendToStreamlit("streamlit:componentReady", { apiVersion: 1 });
+            setFrameHeight(0);
+
+            var reported = false;
+
+            function reportLeave() {
+                if (reported) return;
+                reported = true;
+                setComponentValue(true);
+            }
+
+            // Sekme değişimi / pencere küçültme / arka plana alma
+            document.addEventListener("visibilitychange", function () {
+                if (document.hidden) reportLeave();
+            });
+
+            // Başka bir pencereye/uygulamaya veya başka bir siteye (aynı sekmede
+            // adres çubuğuna yeni bir site yazılması) geçiş -> pencere odağı kaybı
+            window.addEventListener("blur", reportLeave);
+
+            // Sekme kapatılırsa / sayfadan tamamen ayrılırsa
+            window.addEventListener("pagehide", reportLeave);
+        })();
+    </script>
+</body>
+
+</html>

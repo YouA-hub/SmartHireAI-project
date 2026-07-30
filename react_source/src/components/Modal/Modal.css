@@ -1,0 +1,108 @@
+/* ============================================================
+   Modal — Spec §2.7
+   - Ortalanmış, max-width 480px
+   - Overlay: rgba(0,0,0,0.4)
+   - Kapatma: X ikonu + overlay tıklama + ESC
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-5);
+
+  animation: fadeInOnly var(--duration-page) var(--easing-default) both;
+}
+
+.modal {
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  border: var(--border-thin);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - var(--space-7));
+  overflow-y: auto;
+  position: relative;
+
+  animation: fadeIn var(--duration-page) var(--easing-default) both;
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: var(--border-thin);
+}
+
+.modal__title {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+}
+
+.modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-hover) var(--easing-default),
+              color var(--duration-hover) var(--easing-default);
+}
+
+.modal__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.modal__body {
+  padding: var(--space-5);
+}
+
+.modal__footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: var(--border-thin);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ---- Confirm-dialog additions ---- */
+
+.modal__header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal__header-icon--danger  { background: var(--color-danger-bg);  color: var(--color-danger); }
+.modal__header-icon--warning { background: var(--color-warning-bg); color: var(--color-warning); }
+.modal__header-icon--success { background: rgba(34, 197, 94, 0.1);  color: var(--color-success); }
+.modal__header-icon--primary { background: rgba(37, 99, 235, 0.1);  color: var(--color-primary); }
+
+.modal__description {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+  padding: var(--space-4) var(--space-5) 0;
+  margin: 0;
+}

@@ -1,0 +1,215 @@
+/* ================================================
+   Development Plan Page Styles
+   ================================================ */
+
+.dev-plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  font-family: var(--font-family);
+}
+
+/* ---- Priority grid ---- */
+.dev-plan__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ---- Priority card ---- */
+.priority-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.priority-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.priority-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.priority-card__icon--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.priority-card__icon--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.priority-card__icon--primary {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.priority-card__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.priority-card__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
+.priority-card__title {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.priority-card__score {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.priority-card__score strong {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ---- Goal ---- */
+.priority-card__goal {
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.priority-card__goal-label {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px;
+}
+
+.priority-card__goal-text {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+  margin: 0;
+}
+
+/* ---- Resources ---- */
+.priority-card__resources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.priority-card__resources-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-1);
+}
+
+.priority-card__resource {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-thin);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: all var(--duration-hover) var(--easing-default);
+}
+
+.priority-card__resource:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.03);
+}
+
+.priority-card__resource-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+/* ---- Footer ---- */
+.priority-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  padding-top: var(--space-2);
+  border-top: var(--border-thin);
+}
+
+.priority-card__footer strong {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ---- Retry strip ---- */
+.dev-plan__retry-strip {
+  background: var(--color-card);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.dev-plan__retry-text {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  color: var(--color-primary);
+}
+
+.dev-plan__retry-title {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 2px;
+}
+
+.dev-plan__retry-sub {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .dev-plan__retry-strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dev-plan__grid {
+    grid-template-columns: 1fr;
+  }
+}

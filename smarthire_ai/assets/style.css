@@ -1,0 +1,329 @@
+/* ============================================================
+   SmartHire AI — Streamlit Custom CSS Design System
+   Kaynak: react_source/src/tokens/tokens.css & index.css
+   TÜBİTAK 2209-A projesi için özel olarak hazırlanmıştır.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* COLORS - Spec §2.1 */
+  --color-primary: #2563EB;
+  --color-secondary: #4F46E5;
+  --color-accent: #8B5CF6;
+
+  --color-bg: #F8FAFC;
+  --color-card: #FFFFFF;
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-muted: #94A3B8;
+
+  --color-border: #E2E8F0;
+  --border-thin: 0.5px solid #E2E8F0;
+
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
+  --color-success-bg: #F0FDF4;
+  --color-warning-bg: #FFFBEB;
+  --color-danger-bg: #FEF2F2;
+
+  --color-success-text: #16A34A;
+  --color-warning-text: #B45309;
+  --color-danger-text: #DC2626;
+
+  --gradient-main: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%);
+  --gradient-main-90: linear-gradient(90deg, #2563EB 0%, #8B5CF6 100%);
+
+  /* TYPOGRAPHY - Spec §2.2 */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-h1: 24px;
+  --text-h2: 20px;
+  --text-h3: 16px;
+  --text-body: 14px;
+  --text-small: 13px;
+  --text-caption: 12px;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* SPACING - Spec §2.3 (8px Grid) */
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+
+  /* RADIUS */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 20px;
+
+  /* SHADOW & BORDER */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --border-default: 1px solid #E2E8F0;
+}
+
+/* Base App Container Override */
+html,
+body,
+[data-testid="stAppViewContainer"] {
+  font-family: var(--font-family) !important;
+  background-color: var(--color-bg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Hide default Streamlit noise */
+#MainMenu,
+footer {
+  visibility: hidden;
+}
+
+/*
+  ÖNEMLİ: "header" elementini tamamen visibility:hidden yapmıyoruz.
+  Sidebar kapatıldığında onu yeniden açmaya yarayan ok/ikon
+  (stSidebarCollapsedControl) bu header alanının içinde/üstünde yer
+  alıyor. header'ın tamamını gizlemek bu oku da görünmez VE
+  tıklanamaz hale getiriyordu — kapatılan sidebar bir daha
+  açılamıyordu. Bunun yerine header'ı görünür ama saydam bırakıp
+  sadece içindeki gereksiz araç çubuğu ikonlarını (Deploy, menü vb.)
+  gizliyoruz; sidebar aç/kapa kontrolü olduğu gibi çalışmaya devam
+  ediyor.
+*/
+[data-testid="stHeader"] {
+  visibility: visible !important;
+  background: transparent !important;
+  height: auto !important;
+}
+
+[data-testid="stToolbar"] {
+  visibility: hidden;
+}
+
+[data-testid="stSidebarCollapsedControl"] {
+  visibility: visible !important;
+  display: flex !important;
+}
+
+[data-testid="stSidebar"] {
+  background-color: #FFFFFF !important;
+  border-right: var(--border-default) !important;
+}
+
+.block-container {
+  padding-top: 1.5rem !important;
+  padding-bottom: 2.5rem !important;
+  max-width: 1100px !important;
+}
+
+/* Typography Hierarchy */
+h1 {
+  font-size: var(--text-h1) !important;
+  font-weight: 700 !important;
+  color: var(--color-text-primary) !important;
+  margin-bottom: var(--space-2) !important;
+}
+
+h2 {
+  font-size: var(--text-h2) !important;
+  font-weight: 600 !important;
+  color: var(--color-text-primary) !important;
+  margin-bottom: var(--space-2) !important;
+}
+
+h3 {
+  font-size: var(--text-h3) !important;
+  font-weight: 600 !important;
+  color: var(--color-text-primary) !important;
+  margin-bottom: var(--space-2) !important;
+}
+
+p,
+span,
+div {
+  font-family: var(--font-family);
+}
+
+/* Auth Cards & Layout (React Auth.css) */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.auth-card-box {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 40px rgba(37, 99, 235, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: #475569;
+  margin: 0 0 24px 0;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: #E2E8F0;
+}
+
+.auth-divider-text {
+  padding: 0 12px;
+  font-size: 12px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+/* Cards Component Styling */
+.sh-card {
+  background: var(--color-card);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sh-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.sh-card-gradient {
+  background: white;
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+
+.sh-card-borderless {
+  background: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.sh-stat-card {
+  background: #FFFFFF;
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.sh-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  background: var(--gradient-main-90);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 6px 0;
+}
+
+.sh-stat-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* Streamlit Button Customization */
+div.stButton>button {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 500 !important;
+  font-family: var(--font-family) !important;
+  transition: all 0.2s ease !important;
+}
+
+div.stButton>button[kind="primary"] {
+  background: var(--gradient-main) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+}
+
+div.stButton>button[kind="secondary"] {
+  background-color: #FFFFFF !important;
+  border: var(--border-default) !important;
+  color: var(--color-text-primary) !important;
+}
+
+div.stButton>button[kind="secondary"]:hover {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background-color: #F8FAFC !important;
+}
+
+/* Custom Streamlit Progress Bar */
+div.stProgress>div>div>div>div {
+  background: var(--gradient-main-90) !important;
+  border-radius: 4px !important;
+}
+
+/* Footer Styling */
+.sh-footer {
+  border-top: var(--border-default);
+  margin-top: 40px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* Sol taraftaki Pages menüsünü gizle */
+section[data-testid="stSidebarNav"] {
+  display: none;
+}
+
+/* Sayfa listesinin üst kısmını da gizle */
+[data-testid="stSidebarNavItems"] {
+  display: none;
+}
+
+/* Gerekirse sidebar'ın boş kalan kısmını da temizle */
+[data-testid="stSidebar"] nav {
+  display: none;
+}

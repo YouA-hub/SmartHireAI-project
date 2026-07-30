@@ -1,0 +1,84 @@
+/* ============================================================
+   FullscreenLayout — Auth / Onboarding / AI Processing
+   Merkezi hizalama, sidebar yok
+   ============================================================ */
+
+.fullscreen-layout {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.fullscreen-layout__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--navbar-height);
+  border-bottom: var(--border-thin);
+  background: var(--color-card);
+}
+
+.fullscreen-layout__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.fullscreen-layout__logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.fullscreen-layout__logo-text {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.fullscreen-layout__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  animation: fadeIn var(--duration-page) var(--easing-default) both;
+}
+
+/* flush: arka planını kendisi yöneten sayfalar (AI Processing gibi) için padding=0 */
+.fullscreen-layout__content--flush {
+  padding: 0;
+  align-items: stretch;
+}
+
+
+.fullscreen-layout__content--top {
+  align-items: flex-start;
+  padding-top: var(--space-7);
+}
+
+/* Auth card wrapper — max 400px */
+.auth-card-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Onboarding wrapper — wider */
+.onboarding-wrapper {
+  width: 100%;
+  max-width: 640px;
+}
+
+@media (max-width: 640px) {
+  .fullscreen-layout__content {
+    padding: var(--space-4) var(--space-3);
+    align-items: flex-start;
+  }
+}

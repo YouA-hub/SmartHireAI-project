@@ -1,0 +1,101 @@
+/* ============================================================
+   SmartHire AI — Motion / Animation Rules
+   Kaynak: spec §5
+   - Hover: 150ms ease-out
+   - Sayfa/kart geçişleri: 200-250ms fade + 8px slide
+   - Skor barı dolması: 2-2.5s cubic ease-out
+   - AI processing metin değişimi: 900ms aralıklarla fade
+   - Hiçbir animasyon 3 saniyeyi geçmez
+   - Döngüsel/dikkat dağıtıcı animasyon yok (spinner hariç, sade)
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Keyframes
+---------------------------------------------------------- */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes fadeInOnly {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOutOnly {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(16px); }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Spinner — sade, tek tur */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* AI Processing — nabız animasyonu */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.97); }
+}
+
+/* Progress bar fill (kullanılıyor: ProgressBar component) */
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: var(--target-width, 100%); }
+}
+
+/* ----------------------------------------------------------
+   Utility animation classes
+---------------------------------------------------------- */
+
+.anim-fade-in {
+  animation: fadeIn var(--duration-page) var(--easing-default) both;
+}
+
+.anim-fade-out {
+  animation: fadeOut var(--duration-page) var(--easing-default) both;
+}
+
+.anim-slide-in-right {
+  animation: slideInRight var(--duration-page) var(--easing-default) both;
+}
+
+.anim-slide-out-right {
+  animation: slideOutRight var(--duration-page) var(--easing-default) both;
+}
+
+/* ----------------------------------------------------------
+   Hover transition mixin replacement
+   Tüm interactive element'ler bu class'ı base olarak kullanır
+---------------------------------------------------------- */
+
+.transition-hover {
+  transition: all var(--duration-hover) var(--easing-default);
+}
+
+.transition-page {
+  transition: all var(--duration-page) var(--easing-default);
+}

@@ -1,0 +1,78 @@
+/* ============================================================
+   Skeleton — Spec §2.9
+   Loading + Skeleton tek component — animasyonlu gri dikdörtgenler
+   Spinner değil — algılanan hızı artırır
+   ============================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    #f1f5f9 50%,
+    var(--color-border) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Sizes */
+.skeleton--text {
+  height: 14px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.skeleton--text-sm {
+  height: 12px;
+  width: 70%;
+  border-radius: 4px;
+}
+
+.skeleton--title {
+  height: 20px;
+  width: 55%;
+  border-radius: 4px;
+}
+
+.skeleton--button {
+  height: 40px;
+  width: 120px;
+}
+
+.skeleton--avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton--avatar-sm  { width: 28px; height: 28px; }
+.skeleton--avatar-md  { width: 36px; height: 36px; }
+.skeleton--avatar-lg  { width: 48px; height: 48px; }
+
+.skeleton--full { width: 100%; }
+.skeleton--half { width: 50%; }
+.skeleton--third { width: 33%; }
+
+/* Skeleton Card — reusable card placeholder */
+.skeleton-card {
+  background-color: var(--color-card);
+  border-radius: var(--radius-md);
+  border: var(--border-thin);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.skeleton-card__row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}

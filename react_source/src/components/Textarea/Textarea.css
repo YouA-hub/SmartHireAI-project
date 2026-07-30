@@ -1,0 +1,69 @@
+/* ============================================================
+   Textarea — Spec §2.3
+   Aynı token sistemi, min-height 100px
+   ============================================================ */
+
+.textarea-field {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--space-2);
+
+  font-family: var(--font-family);
+  font-size: var(--text-body);
+  font-weight: var(--weight-normal);
+  color: var(--color-text-primary);
+  line-height: var(--lh-body);
+
+  background-color: var(--color-card);
+  border: var(--border-default);
+  border-radius: var(--radius-sm);
+
+  resize: vertical;
+  outline: none;
+  appearance: none;
+
+  transition:
+    border-color var(--duration-hover) var(--easing-default),
+    box-shadow var(--duration-hover) var(--easing-default),
+    background-color var(--duration-hover) var(--easing-default);
+}
+
+.textarea-field::placeholder {
+  color: var(--color-muted);
+}
+
+.textarea-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.textarea-field--error {
+  border-color: var(--color-danger);
+}
+
+.textarea-field--error:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.textarea-field--warning {
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+}
+
+.textarea-field--warning:focus {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.textarea-field:disabled {
+  background-color: var(--color-bg);
+  color: var(--color-muted);
+  cursor: not-allowed;
+  resize: none;
+}
+
+/* No resize */
+.textarea-field--no-resize {
+  resize: none;
+}

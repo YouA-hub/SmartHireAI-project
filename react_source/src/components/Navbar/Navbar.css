@@ -1,0 +1,100 @@
+/* ============================================================
+   Navbar — Spec §2.6
+   Sadece mobilde görünür: logo + hamburger menü
+   Desktop'ta sidebar üstlenir navigasyonu
+   ============================================================ */
+
+.navbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--navbar-height);
+  padding: 0 var(--space-3);
+  background-color: var(--color-card);
+  border-bottom: var(--border-thin);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.navbar__logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.navbar__logo-text {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.navbar__hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background var(--duration-hover) var(--easing-default);
+}
+
+.navbar__hamburger:hover {
+  background: var(--color-bg);
+}
+
+/* Mobile drawer overlay */
+.navbar-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 300;
+}
+
+.navbar-drawer-overlay--open {
+  display: block;
+}
+
+/* Mobile drawer */
+.navbar-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background-color: var(--color-card);
+  border-right: var(--border-thin);
+  z-index: 400;
+  transform: translateX(-100%);
+  transition: transform var(--duration-page) var(--easing-default);
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-drawer--open {
+  transform: translateX(0);
+}
+
+/* Show navbar only on mobile */
+@media (max-width: 640px) {
+  .navbar {
+    display: flex;
+  }
+}

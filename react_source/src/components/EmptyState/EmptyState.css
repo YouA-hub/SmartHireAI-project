@@ -1,0 +1,52 @@
+/* ============================================================
+   EmptyState — Spec §2.9 — ZORUNLU component
+   - Ortalanmış ikon (muted renk)
+   - 14px açıklama
+   - Opsiyonel CTA
+   ============================================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  gap: var(--space-3);
+}
+
+.empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--color-bg);
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.empty-state__title {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+}
+
+.empty-state__description {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+  max-width: 320px;
+}
+
+.empty-state__action {
+  margin-top: var(--space-1);
+}
+
+/* Error variant */
+.empty-state--error .empty-state__icon {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}

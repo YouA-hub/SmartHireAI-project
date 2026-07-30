@@ -1,0 +1,203 @@
+/* ================================================
+   Settings Page Styles
+   ================================================ */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  font-family: var(--font-family);
+}
+
+/* ---- Tab content areas ---- */
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+/* ---- Generic form ---- */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.settings-label {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.settings-select {
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  font-size: var(--text-body);
+  font-family: var(--font-family);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color var(--duration-hover) var(--easing-default);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ---- Notification list ---- */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-thin);
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+.notif-item__text {
+  flex: 1;
+}
+
+.notif-item__label {
+  font-size: var(--text-body);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  margin: 0 0 2px;
+}
+
+.notif-item__sub {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ---- Toggle switch ---- */
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--color-border);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--duration-hover) var(--easing-default);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.toggle--on {
+  background: var(--gradient-main);
+}
+
+.toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform var(--duration-hover) var(--easing-default);
+}
+
+.toggle--on .toggle__thumb {
+  transform: translateX(20px);
+}
+
+/* ---- Account items ---- */
+.account-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-thin);
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.account-item__label {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 2px;
+}
+
+.account-item__sub {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ---- Danger zone card ---- */
+.settings__danger-card {
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  background: #FEF2F2 !important;
+}
+
+.danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.danger-zone__label {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-danger);
+  margin: 0 0 2px;
+}
+
+.danger-zone__sub {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .danger-zone {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .account-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

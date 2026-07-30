@@ -1,0 +1,316 @@
+/* Dashboard page styles */
+.dashboard {}
+
+.dashboard__welcome {
+  margin-bottom: var(--space-6);
+}
+
+.dashboard__welcome-greeting {
+  font-size: var(--text-h1);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+  margin-bottom: var(--space-1);
+}
+
+.dashboard__welcome-sub {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+}
+
+/* Metrics row */
+.dashboard__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+/* Score card (gradient) */
+.dashboard__score-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard__score-value {
+  font-size: 48px;
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  line-height: 1;
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.dashboard__score-label {
+  font-size: var(--text-small);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: var(--lh-body);
+}
+
+.dashboard__score-source {
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--space-2);
+}
+
+/* Two-column content area */
+.dashboard__content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* Suggestions list */
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-thin);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.suggestion-item__icon--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.suggestion-item__icon--info {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-primary);
+}
+
+.suggestion-item__icon--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.suggestion-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-item__title {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+}
+
+.suggestion-item__desc {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+  margin-top: 2px;
+}
+
+/* Quick actions panel */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--border-thin);
+  background: var(--color-card);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duration-hover) var(--easing-default),
+              border-color var(--duration-hover) var(--easing-default);
+}
+
+.quick-action-item:hover {
+  background: var(--color-bg);
+  border-color: var(--color-muted);
+}
+
+.quick-action-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.quick-action-item__text {
+  flex: 1;
+}
+
+.quick-action-item__label {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.quick-action-item__sub {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.quick-action-item__arrow {
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard__metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard__score-value {
+    font-size: 40px;
+  }
+}
+
+/* ---- Interview start modal content ---- */
+.interview-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Seçenek butonu (Yeni ilan gir) */
+.interview-modal__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color var(--duration-hover) var(--easing-default),
+              background var(--duration-hover) var(--easing-default);
+}
+
+.interview-modal__option:hover {
+  border-color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.03);
+}
+
+.interview-modal__option-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.interview-modal__option-icon--blue {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.interview-modal__option-icon--purple {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-accent);
+}
+
+.interview-modal__option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.interview-modal__option-label {
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 2px;
+}
+
+.interview-modal__option-sub {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--lh-body);
+}
+
+.interview-modal__option-arrow {
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+/* Divider */
+.interview-modal__divider {
+  position: relative;
+  text-align: center;
+}
+
+.interview-modal__divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.interview-modal__divider span {
+  position: relative;
+  background: var(--color-card);
+  padding: 0 var(--space-2);
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+/* Geçmiş ilanlar grubu */
+.interview-modal__option-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.interview-modal__past-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
