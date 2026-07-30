@@ -107,9 +107,39 @@ footer {
   visibility: hidden;
 }
 
-[data-testid="stSidebarCollapsedControl"] {
+/* Sidebar Kapatıldığında Sol Üstte Beliren "Sidebar'ı Aç" Butonunu Vurgula ve Sabitle */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarToggleButton"],
+[data-testid="collapsedControl"],
+button[aria-label="Expand sidebar"],
+button[aria-label="Open sidebar"] {
   visibility: visible !important;
   display: flex !important;
+  position: fixed !important;
+  top: 14px !important;
+  left: 14px !important;
+  z-index: 999999 !important;
+  background-color: #FFFFFF !important;
+  border: 1.5px solid #2563EB !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+  padding: 6px 10px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-testid="stSidebarCollapsedControl"]:hover,
+[data-testid="stSidebarToggleButton"]:hover,
+[data-testid="collapsedControl"]:hover {
+  background-color: #EFF6FF !important;
+  transform: scale(1.05) !important;
+  border-color: #1D4ED8 !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="stSidebarToggleButton"] svg {
+  fill: #2563EB !important;
+  color: #2563EB !important;
 }
 
 [data-testid="stSidebar"] {
