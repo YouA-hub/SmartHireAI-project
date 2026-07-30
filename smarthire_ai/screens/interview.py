@@ -116,8 +116,8 @@ def _finish_interview():
     )
 
     cv_match = {
-        "match_rate": cv_data.get("match_rate", 70),
-    }
+    "match_rate": cv_data.get("match_rate") or 70,
+}
 
     summary = build_result_summary(
         interview_result=interview_result,

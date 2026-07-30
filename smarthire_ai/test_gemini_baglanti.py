@@ -28,24 +28,33 @@ try:
 
     client = genai.Client(api_key=api_key)
 
-    print("İstek gönderiliyor...")
-    response = client.models.generate_content(
-        model=model_name,
-        contents="Sadece 'merhaba' kelimesiyle cevap ver."
-    )
+    models = [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash-lite",
+    ]
 
-    print()
-    print("✅ BAŞARILI! Gemini'den gelen cevap:")
-    print(response.text)
+    for model in models:
+
+        print("\n" + "-" * 50)
+        print(f"Model deneniyor: {model}")
+
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents="Sadece 'OK' yaz."
+            )
+
+            print("✅ ÇALIŞTI")
+            print(response.text)
+
+        except Exception as err:
+            print("❌ Çalışmadı")
+            print(err)
 
 except Exception as e:
     print()
     print("❌ HATA OLUŞTU:")
-    print(f"   Tip: {type(e).__name__}")
-    print(f"   Mesaj: {e}")
-    print()
-    print("Olası nedenler:")
-    print("  1. API anahtarı geçersiz / yanlış kopyalanmış (boşluk, eksik karakter)")
-    print("  2. API anahtarı için Gemini API etkinleştirilmemiş")
-    print("  3. Kota (quota) aşılmış veya faturalandırma sorunu var")
-    print("  4. Model adı yanlış (gemini-2.5-flash yerine deneyebileceğin: gemini-2.0-flash)")
+    print(f"Tip: {type(e).__name__}")
+    print(f"Mesaj: {e}")

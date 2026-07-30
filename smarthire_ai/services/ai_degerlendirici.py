@@ -2,17 +2,6 @@
 SmartHire AI
 Gemini AI Evaluation Service
 
-Bu modül;
-
-- CV ile iş ilanı eşleştirmesi
-- Dinamik mülakat sorusu üretimi
-- Mülakat değerlendirmesi
-- Tahmini işe alınma olasılığı
-- Kaynak önerileri
-- Dil tutarlılığı analizi
-
-işlemlerini Google Gemini API kullanarak gerçekleştirir.
-
 TÜBİTAK 2209-A
 """
 
@@ -20,59 +9,20 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+import time
 from typing import Dict, List, Optional
 
+from google.genai import types
 
-from config import GEMINI_API_KEY
+from config import MODEL_NAME
+from services.gemini_client import client
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-logger.info("Gemini API anahtarı yüklendi.")
 
-
-
-
-_client = None
-
-# ----------------------------------------------------
-# Gemini Client
-# ----------------------------------------------------
-
-def _get_client():
-    """
-    Gemini istemcisini yalnızca ilk kullanımda oluşturur.
-    """
-    global _client
-
-    if _client is not None:
-        return _client
-
-    api_key = os.getenv("GEMINI_API_KEY")
-
-    if not api_key:
-        logger.warning("Gemini API Key bulunamadı.")
-        return None
-
-    try:
-        from google import genai
-        
-        _client = genai.Client(
-            api_key=api_key
-        )
-        
-        logger.info("Gemini bağlantısı kuruldu.")
-        return _client
-
-    except Exception as e:
-        logger.exception(e)
-        return None
-
-
-# ----------------------------------------------------
-# JSON Şemaları
-# ----------------------------------------------------
+# =====================================================
+# JSON SCHEMAS
+# =====================================================
 
 QUESTION_SCHEMA = {
     "type": "object",
@@ -82,12 +32,8 @@ QUESTION_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "category": {
-                        "type": "string"
-                    },
-                    "question": {
-                        "type": "string"
-                    }
+                    "category": {"type": "string"},
+                    "question": {"type": "string"}
                 },
                 "required": [
                     "category",
@@ -104,24 +50,16 @@ QUESTION_SCHEMA = {
 CV_MATCH_SCHEMA = {
     "type": "object",
     "properties": {
-        "match_rate": {
-            "type": "integer"
-        },
+        "match_rate": {"type": "integer"},
         "matched_skills": {
             "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "items": {"type": "string"}
         },
         "missing_skills": {
             "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "items": {"type": "string"}
         },
-        "summary": {
-            "type": "string"
-        }
+        "summary": {"type": "string"}
     },
     "required": [
         "match_rate",
@@ -139,21 +77,11 @@ INTERVIEW_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "category": {
-                        "type": "string"
-                    },
-                    "content_score": {
-                        "type": "integer"
-                    },
-                    "clarity_score": {
-                        "type": "integer"
-                    },
-                    "relevance_score": {
-                        "type": "integer"
-                    },
-                    "final_score": {
-                        "type": "integer"
-                    }
+                    "category": {"type": "string"},
+                    "content_score": {"type": "integer"},
+                    "clarity_score": {"type": "integer"},
+                    "relevance_score": {"type": "integer"},
+                    "final_score": {"type": "integer"}
                 },
                 "required": [
                     "category",
@@ -189,38 +117,149 @@ INTERVIEW_SCHEMA = {
 }
 
 
-# ----------------------------------------------------
-# Gemini Ortak Çağrısı
-# ----------------------------------------------------
+# =====================================================
+# GEMINI HELPERS
+# =====================================================
 
-def _call_gemini(prompt: str, schema: dict) -> Optional[dict]:
-    client = _get_client()
+def _clean_json(text: str) -> str:
+    """
+    Gemini bazen
+    ```json
+    ...
+    ```
+    şeklinde cevap verir.
+    """
+    if not text:
+        return ""
 
-    if client is None:
-        return None
+    text = text.strip()
 
-    try:
-        from google.genai import types
+    if text.startswith("```json"):
+        text = text.replace("```json", "", 1)
 
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=schema,
-                temperature=0.2
+    if text.startswith("```"):
+        text = text.replace("```", "", 1)
+
+    if text.endswith("```"):
+        text = text[:-3]
+
+    return text.strip()
+
+
+def _call_gemini(
+    prompt: str,
+    schema: dict,
+    retries: int = 3
+) -> Optional[dict]:
+
+    for attempt in range(retries):
+        try:
+            print(f"\n====== GEMINI DENEME {attempt+1}/{retries} ======")
+
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.2,
+                    response_mime_type="application/json",
+                    response_schema=schema
+                )
             )
-        )
-        return json.loads(response.text)
 
-    except Exception as e:
-        logger.exception(e)
-        return None
+            print("\n====== GEMINI RAW RESPONSE ======")
+            print(response.text)
+            print("=================================\n")
+
+            text = _clean_json(response.text)
+            result = json.loads(text)
+
+            return result
+
+        except Exception as e:
+
+            print("\n========== GEMINI ERROR ==========")
+            print(type(e).__name__)
+            print(e)
+            print("==================================\n")
+
+            time.sleep(2)
+
+    print("❌ Gemini başarısız. Fallback kullanılacak.")
+    return None
 
 
-# ----------------------------------------------------
-# Dinamik Mülakat Sorusu Üretme
-# ----------------------------------------------------
+# =====================================================
+# CV - JOB MATCH
+# =====================================================
+
+def evaluate_cv_match(
+    cv_text: str,
+    position: str,
+    job_description: str,
+    experience_level: str = ""
+) -> dict:
+    """
+    CV ile iş ilanı arasındaki uyumu Gemini ile analiz eder.
+    """
+    fallback = {
+        "match_rate": 70,
+        "matched_skills": [],
+        "missing_skills": [],
+        "summary": "AI değerlendirmesi yapılamadığı için yaklaşık skor gösteriliyor.",
+        "used_ai": False
+    }
+
+    if not cv_text:
+        return fallback
+
+    prompt = f"""
+Sen deneyimli bir İnsan Kaynakları uzmanısın.
+
+Görevin aşağıdaki CV ile iş ilanını karşılaştırmaktır.
+
+POZİSYON
+{position}
+
+DENEYİM
+{experience_level}
+
+İŞ İLANI
+{job_description}
+
+CV
+{cv_text[:7000]}
+
+Değerlendirmen gereken başlıklar:
+• Teknik beceriler
+• Programlama dilleri
+• Framework bilgisi
+• Eğitim
+• Projeler
+• Deneyim
+• İş ilanındaki zorunlu şartlar
+• Tercih edilen şartlar
+
+Kurallar
+- 0-100 arasında gerçekçi puan ver.
+- Eksik teknolojileri yaz.
+- Güçlü teknolojileri yaz.
+- Türkçe kısa bir özet oluştur.
+
+Sadece JSON döndür.
+"""
+
+    result = _call_gemini(prompt, CV_MATCH_SCHEMA)
+
+    if result is None:
+        return fallback
+
+    result["used_ai"] = True
+    return result
+
+
+# =====================================================
+# INTERVIEW QUESTION GENERATION
+# =====================================================
 
 def generate_interview_questions(
     cv_text: str,
@@ -229,26 +268,25 @@ def generate_interview_questions(
     experience_level: str = ""
 ) -> dict:
     """
-    CV ve iş ilanını analiz ederek
-    pozisyona özel 5 mülakat sorusu üretir.
+    CV ve iş ilanına göre dinamik mülakat soruları üretir.
     """
     fallback = {
         "questions": [
             {
-                "category": "Genel Yazılım Bilgisi",
-                "question": "Kendinizi ve teknik geçmişinizi kısaca anlatır mısınız?"
-            },
-            {
-                "category": "Problem Çözme",
-                "question": "Zorlandığınız bir projeyi ve nasıl çözdüğünüzü anlatın."
+                "category": "Genel",
+                "question": "Kendinizi ve teknik geçmişinizi kısaca tanıtır mısınız?"
             },
             {
                 "category": "Teknik Bilgi",
-                "question": "Bu pozisyon için en güçlü teknik yönünüz nedir?"
+                "question": f"{position} pozisyonu için en güçlü teknik yönünüz nedir?"
+            },
+            {
+                "category": "Problem Çözme",
+                "question": "Zorlandığınız bir problemi nasıl çözdünüz?"
             },
             {
                 "category": "Takım Çalışması",
-                "question": "Takım içinde yaşadığınız bir problemi nasıl çözdünüz?"
+                "question": "Takım içerisinde yaşadığınız bir anlaşmazlığı nasıl yönettiniz?"
             },
             {
                 "category": "Motivasyon",
@@ -264,28 +302,31 @@ def generate_interview_questions(
     prompt = f"""
 Sen kıdemli bir teknik mülakat uzmanısın.
 
-Aşağıdaki CV'yi ve iş ilanını analiz et.
+Aşağıdaki aday için gerçek bir teknik mülakat hazırla.
 
-HEDEF POZİSYON:
+HEDEF POZİSYON
 {position}
 
-DENEYİM SEVİYESİ:
+DENEYİM
 {experience_level}
 
-İŞ İLANI:
+İŞ İLANI
 {job_description}
 
-CV:
+CV
 {cv_text[:7000]}
 
-Görevin:
+Kurallar:
 - Tam olarak 5 soru üret.
-- Her soru farklı bir kategoriye ait olsun.
-- Kategorileri kendin belirle.
-- Sorular teknik olsun.
-- CV'deki projeleri dikkate al.
+- Sorular birbirinden farklı olsun.
+- Kolaydan zora doğru ilerlesin.
+- CV'de geçen projeleri dikkate al.
 - İş ilanındaki teknolojileri dikkate al.
-- Sorular kolaydan zora doğru ilerlesin.
+- Ezber soru üretme.
+- Teknik odaklı olsun.
+- Gerektiğinde adayın projeleri hakkında soru sor.
+
+Her soru için bir kategori yaz.
 
 Sadece JSON döndür.
 """
@@ -299,179 +340,107 @@ Sadece JSON döndür.
     return result
 
 
-# ----------------------------------------------------
-# CV - İş İlanı Uyum Analizi
-# ----------------------------------------------------
-
-def evaluate_cv_match(
-    cv_text: str,
-    position: str,
-    job_description: str,
-    experience_level: str = ""
-) -> dict:
-    """
-    CV ile iş ilanı arasındaki uyumu analiz eder.
-    """
-    fallback = {
-        "match_rate": 70,
-        "matched_skills": [],
-        "missing_skills": [],
-        "summary": "Gemini kullanılamadığı için yaklaşık skor gösteriliyor.",
-        "used_ai": False
-    }
-
-    if not cv_text or not job_description:
-        return fallback
-
-    prompt = f"""
-Sen deneyimli bir İnsan Kaynakları uzmanısın.
-
-CV ile iş ilanını karşılaştır.
-
-Pozisyon:
-{position}
-
-Deneyim:
-{experience_level}
-
-İş ilanı:
-{job_description}
-
-CV:
-{cv_text[:7000]}
-
-Şunları değerlendir:
-- Eğitim
-- Teknik beceriler
-- Programlama dilleri
-- Framework bilgisi
-- Sertifikalar
-- Projeler
-- Deneyim
-- İş ilanındaki zorunlu yetkinlikler
-- Tercih edilen yetkinlikler
-
-0-100 arasında uyum puanı ver.
-
-Sadece JSON döndür.
-"""
-
-    result = _call_gemini(prompt, CV_MATCH_SCHEMA)
-
-    if result is None:
-        return fallback
-
-    result["used_ai"] = True
-    return result
-
-
-# ----------------------------------------------------
-# Mülakat Değerlendirmesi
-# ----------------------------------------------------
+# =====================================================
+# INTERVIEW EVALUATION
+# =====================================================
 
 def evaluate_interview_answers(
     questions: List[dict],
     answers: List[str],
     position: str,
     experience_level: str = "",
-    cv_text: str = "",
+    cv_text: str = ""
 ) -> dict:
     """
-    Mülakat cevaplarını değerlendirir.
-
-    Her soru;
-    - İçerik Doğruluğu (%50)
-    - Açıklık ve İfade (%30)
-    - İlgi Düzeyi (%20)
-    kriterlerine göre puanlanır.
+    Gemini ile gerçek mülakat değerlendirmesi.
     """
     categories = [q["category"] for q in questions]
 
     fallback = {
         "question_scores": [
             {
-                "category": cat,
-                "content_score": 65,
-                "clarity_score": 65,
-                "relevance_score": 65,
-                "final_score": 65
+                "category": c,
+                "content_score": 60,
+                "clarity_score": 60,
+                "relevance_score": 60,
+                "final_score": 60
             }
-            for cat in categories
+            for c in categories
         ],
-        "strengths": [
-            "Sorular düzenli cevaplandı."
-        ],
+        "strengths": [],
         "improvement_areas": [
-            "Gemini kullanılamadığı için ayrıntılı analiz yapılamadı."
+            "AI değerlendirmesi yapılamadı."
         ],
-        "ai_feedback": "Yaklaşık değerlendirme gösteriliyor.",
+        "ai_feedback": "Gemini yanıt vermediği için yaklaşık skor gösteriliyor.",
         "used_ai": False
     }
 
     if not questions:
         return fallback
 
-    qa_text = ""
-    for i, soru in enumerate(questions):
-        cevap = ""
+    qa = ""
+    for i, question in enumerate(questions):
+        answer = ""
         if i < len(answers):
-            cevap = answers[i]
+            answer = answers[i]
 
-        if not cevap.strip():
-            cevap = "(Boş bırakıldı)"
+        if not answer.strip():
+            answer = "(Boş bırakıldı)"
 
-        qa_text += f"""
+        qa += f"""
 Kategori:
-{soru["category"]}
+{question["category"]}
 
 Soru:
-{soru["question"]}
+{question["question"]}
 
 Cevap:
-{cevap}
+{answer}
 """
 
     prompt = f"""
-Sen deneyimli bir teknik mülakat uzmanısın.
+Sen Google'da çalışan kıdemli bir teknik mülakat uzmanısın.
 
-Aşağıdaki mülakatı değerlendir.
+Aşağıdaki mülakat cevaplarını değerlendir.
 
-HEDEF POZİSYON
+POZİSYON
 {position}
 
 DENEYİM
 {experience_level}
 
 CV
-{cv_text[:4000]}
+{cv_text[:5000]}
 
 SORULAR VE CEVAPLAR
-{qa_text}
-
-Her soru için;
-1) İçerik Doğruluğu (0-100)
-2) Açıklık ve İfade Yeteneği (0-100)
-3) İlgi Düzeyi (0-100)
-puanı ver.
-
-Daha sonra;
-Final Puanını
-(Content × 0.50) + (Clarity × 0.30) + (Relevance × 0.20)
-formülü ile hesapla.
+{qa}
 
 Kurallar:
-- Boş cevap çok düşük puan almalı.
-- Konu dışı cevap düşük puan almalı.
-- Yanlış teknik bilgi düşük puan almalı.
-- Ezber cevap orta puan almalı.
-- Doğru, açıklayıcı ve teknik cevap yüksek puan almalı.
+Boş cevap: 0-20
+Alakasız cevap: 10-35
+Anlamsız karakterler (örnek: asdasd, qwerty, drftgyhujkl): 0-15
+Çok kısa cevap: 20-40
+Yüzeysel cevap: 40-60
+Doğru ama eksik: 60-75
+İyi teknik cevap: 75-90
+Çok güçlü teknik cevap: 90-100
+
+Her soru için şu puanları üret:
+content_score
+clarity_score
+relevance_score
+final_score
+
+final_score şu formülle hesaplanmalı:
+content*0.50 + clarity*0.30 + relevance*0.20
 
 Daha sonra;
-- Güçlü yönleri yaz.
-- Geliştirilmesi gereken alanları yaz.
-- 2-3 cümlelik Türkçe AI geri bildirimi oluştur.
+- güçlü yönler
+- geliştirilmesi gereken alanlar
+- aday hakkında 3-4 cümlelik profesyonel değerlendirme
+oluştur.
 
-Sadece JSON döndür.
+JSON dışında hiçbir şey yazma.
 """
 
     result = _call_gemini(prompt, INTERVIEW_SCHEMA)
@@ -483,249 +452,215 @@ Sadece JSON döndür.
     return result
 
 
-# ----------------------------------------------------
-# Genel Mülakat Skoru
-# ----------------------------------------------------
+# =====================================================
+# SCORE CALCULATIONS
+# =====================================================
 
 def calculate_interview_score(question_scores: List[dict]) -> int:
-    """
-    Beş sorunun ortalamasını alır.
-    """
+    """Genel mülakat puanı."""
     if not question_scores:
         return 0
 
-    ortalama = sum(
-        q["final_score"] for q in question_scores
-    ) / len(question_scores)
+    return round(
+        sum(q["final_score"] for q in question_scores) / len(question_scores)
+    )
 
-    return round(ortalama)
-
-
-# ----------------------------------------------------
-# İletişim Skoru
-# ----------------------------------------------------
 
 def calculate_communication_score(question_scores: List[dict]) -> int:
-    """
-    Açıklık ve İfade puanlarının ortalaması.
-    """
+    """İfade puanı."""
     if not question_scores:
         return 0
 
-    ortalama = sum(
-        q["clarity_score"] for q in question_scores
-    ) / len(question_scores)
+    return round(
+        sum(q["clarity_score"] for q in question_scores) / len(question_scores)
+    )
 
-    return round(ortalama)
-
-
-# ----------------------------------------------------
-# Tahmini İşe Alınma Olasılığı
-# ----------------------------------------------------
 
 def calculate_hireability(
     interview_score: int,
     cv_match_score: int
 ) -> int:
     """
-    Hireability = Mülakat × 0.65 + CV × 0.35
+    İşe alınma olasılığı.
+    Mülakat %65, CV %35
     """
-    skor = (interview_score * 0.65) + (cv_match_score * 0.35)
-    return round(skor)
 
+    if interview_score is None:
+        interview_score = 0
 
-# ----------------------------------------------------
-# Güçlü Yönleri Belirleme
-# ----------------------------------------------------
+    if cv_match_score is None:
+        cv_match_score = 70
 
-def get_top_strengths(question_scores: List[dict], top_n: int = 3) -> List[str]:
-    """
-    En yüksek puanlı kategorileri döndürür.
+    score = (interview_score * 0.65) + (cv_match_score * 0.35)
 
-    NOT: top_n, mevcut soru sayısının yarısını geçemez. Aksi halde
-    (örn. 5 soru + top_n=3 ile) en yüksek 3 ve en düşük 3 kategori
-    ortadaki soruyu paylaşır ve sonuç ekranında "Güçlü Yönler" ile
-    "Gelişim Alanları" aynı kategoriyi gösterir — bu bir çakışma
-    hatasıydı.
-    """
+    return round(score)
+
+# =====================================================
+# STRENGTHS
+# =====================================================
+
+def get_top_strengths(
+    question_scores: List[dict],
+    top_n: int = 3
+) -> List[str]:
+
     if not question_scores:
         return []
 
-    max_n = max(1, len(question_scores) // 2)
-    effective_n = min(top_n, max_n)
-
-    sirali = sorted(
+    sorted_scores = sorted(
         question_scores,
         key=lambda x: x["final_score"],
         reverse=True
     )
-    return [item["category"] for item in sirali[:effective_n]]
+
+    result = []
+    for item in sorted_scores:
+        if item["final_score"] >= 75:
+            result.append(item["category"])
+
+    if not result:
+        result = [item["category"] for item in sorted_scores[:2]]
+
+    return result[:top_n]
 
 
-# ----------------------------------------------------
-# Gelişim Alanlarını Belirleme
-# ----------------------------------------------------
+# =====================================================
+# IMPROVEMENTS
+# =====================================================
 
-def get_improvement_areas(question_scores: List[dict], top_n: int = 3) -> List[str]:
-    """
-    En düşük puanlı kategorileri döndürür.
+def get_improvement_areas(
+    question_scores: List[dict],
+    top_n: int = 3
+) -> List[str]:
 
-    NOT: get_top_strengths ile aynı sebepten top_n, soru sayısının
-    yarısıyla sınırlandırılıyor — bkz. get_top_strengths docstring'i.
-    """
     if not question_scores:
         return []
 
-    max_n = max(1, len(question_scores) // 2)
-    effective_n = min(top_n, max_n)
-
-    sirali = sorted(
+    sorted_scores = sorted(
         question_scores,
         key=lambda x: x["final_score"]
     )
-    return [item["category"] for item in sirali[:effective_n]]
+
+    result = []
+    for item in sorted_scores:
+        if item["final_score"] < 70:
+            result.append(item["category"])
+
+    if not result:
+        result = [item["category"] for item in sorted_scores[-2:]]
+
+    return result[:top_n]
 
 
-# ----------------------------------------------------
-# Kaynak Önerileri
-# ----------------------------------------------------
+# =====================================================
+# RESOURCE SUGGESTIONS
+# =====================================================
 
 RESOURCE_LIBRARY = {
     "Python": [
-        "https://docs.python.org/3/",
-        "https://realpython.com/",
-        "https://www.freecodecamp.org/"
+        "[https://docs.python.org/3/](https://docs.python.org/3/)",
+        "[https://realpython.com/](https://realpython.com/)"
     ],
     "Java": [
-        "https://docs.oracle.com/en/java/",
-        "https://www.baeldung.com/",
-        "https://www.geeksforgeeks.org/java/"
-    ],
-    "React": [
-        "https://react.dev/",
-        "https://scrimba.com/learn-react",
-        "https://frontendmasters.com/"
+        "[https://docs.oracle.com/en/java/](https://docs.oracle.com/en/java/)",
+        "[https://www.baeldung.com/](https://www.baeldung.com/)"
     ],
     "SQL": [
-        "https://www.sqlbolt.com/",
-        "https://mode.com/sql-tutorial/",
-        "https://www.w3schools.com/sql/"
+        "[https://sqlbolt.com/](https://sqlbolt.com/)",
+        "[https://mode.com/sql-tutorial/](https://mode.com/sql-tutorial/)"
+    ],
+    "React": [
+        "[https://react.dev/](https://react.dev/)",
+        "[https://scrimba.com/learn-react](https://scrimba.com/learn-react)"
     ],
     "API": [
-        "https://restfulapi.net/",
-        "https://developer.mozilla.org/",
-        "https://swagger.io/"
+        "[https://developer.mozilla.org/](https://developer.mozilla.org/)",
+        "[https://restfulapi.net/](https://restfulapi.net/)"
     ]
 }
 
 def suggest_learning_resources(
     weak_categories: List[str]
 ) -> Dict[str, List[str]]:
-    """
-    Zayıf kategorilere göre kaynak önerir.
-    """
+
     suggestions = {}
 
     for category in weak_categories:
-        bulundu = False
-        for key in RESOURCE_LIBRARY:
+        found = False
+        for key, value in RESOURCE_LIBRARY.items():
             if key.lower() in category.lower():
-                suggestions[category] = RESOURCE_LIBRARY[key]
-                bulundu = True
+                suggestions[category] = value
+                found = True
                 break
-        
-        if not bulundu:
+
+        if not found:
             suggestions[category] = [
-                "https://roadmap.sh",
-                "https://www.freecodecamp.org/",
-                "https://developer.mozilla.org/"
+                "[https://roadmap.sh](https://roadmap.sh)",
+                "[https://www.freecodecamp.org/](https://www.freecodecamp.org/)"
             ]
 
     return suggestions
 
 
-# ----------------------------------------------------
-# Dil Tutarlılığı Analizi
-# ----------------------------------------------------
+# =====================================================
+# LANGUAGE ANALYSIS
+# =====================================================
 
 def analyze_language_consistency(
     cv_language: Optional[str],
     interview_answers: List[str]
 ) -> str:
-    """
-    CV'deki yabancı dil seviyesi ile
-    İngilizce cevapların tutarlılığını analiz eder.
-    """
+
     if not cv_language:
         return "CV'de yabancı dil bilgisi bulunamadı."
 
-    english_words = 0
-    total_words = 0
+    total = 0
+    english = 0
 
     for answer in interview_answers:
         words = answer.split()
-        total_words += len(words)
-        
-        for word in words:
-            if word.isascii():
-                english_words += 1
+        total += len(words)
+        english += sum(word.isascii() for word in words)
 
-    if total_words == 0:
-        return "İngilizce cevap bulunamadı."
+    if total == 0:
+        return "Yeterli veri yok."
 
-    ratio = english_words / total_words
+    ratio = english / total
 
     if ratio > 0.70:
         return "Tutarlı"
-    elif ratio > 0.35:
+
+    if ratio > 0.35:
         return "Kısmen Tutarlı"
-    
+
     return "Farklılık Gösteriyor"
 
 
-# ----------------------------------------------------
-# Sonuç Ekranı Verisi
-# ----------------------------------------------------
+# =====================================================
+# RESULT SUMMARY
+# =====================================================
 
 def build_result_summary(
     interview_result: dict,
     cv_match: dict,
     interview_answers: List[str],
     cv_language: Optional[str]
-) -> dict:
-    """
-    Sonuç ekranının ihtiyaç duyduğu
-    bütün verileri tek sözlükte toplar.
-    """
-    interview_score = calculate_interview_score(
-        interview_result["question_scores"]
-    )
+):
 
-    communication_score = calculate_communication_score(
-        interview_result["question_scores"]
-    )
+    interview_score = calculate_interview_score(interview_result["question_scores"])
+    communication_score = calculate_communication_score(interview_result["question_scores"])
+    hireability = calculate_hireability(interview_score, cv_match["match_rate"])
 
-    hireability = calculate_hireability(
-        interview_score,
-        cv_match["match_rate"]
-    )
+    strengths = interview_result.get("strengths")
+    if not strengths:
+        strengths = get_top_strengths(interview_result["question_scores"])
 
-    strengths = get_top_strengths(
-        interview_result["question_scores"]
-    )
+    improvements = interview_result.get("improvement_areas")
+    if not improvements:
+        improvements = get_improvement_areas(interview_result["question_scores"])
 
-    improvements = get_improvement_areas(
-        interview_result["question_scores"]
-    )
-
-    resources = suggest_learning_resources(
-        improvements
-    )
-
-    language_analysis = analyze_language_consistency(
-        cv_language,
-        interview_answers
-    )
+    resources = suggest_learning_resources(improvements)
+    language = analyze_language_consistency(cv_language, interview_answers)
 
     return {
         "interview_score": interview_score,
@@ -735,67 +670,15 @@ def build_result_summary(
         "strengths": strengths,
         "improvement_areas": improvements,
         "resource_suggestions": resources,
-        "language_consistency": language_analysis,
+        "language_consistency": language,
         "ai_feedback": interview_result["ai_feedback"],
         "question_scores": interview_result["question_scores"]
     }
-    # ==========================================================
+
+
+# =====================================================
 # TEST
-# ==========================================================
+# =====================================================
 
 if __name__ == "__main__":
-
-    print("AI Değerlendirici Testi")
-
-    cv = """
-Bilgisayar Mühendisliği öğrencisi.
-Python, Java, SQL biliyor.
-2 adet yapay zeka projesi geliştirdi.
-"""
-
-    ilan = """
-Junior Python Developer
-
-Aranan Özellikler:
-- Python
-- SQL
-- Git
-- REST API
-"""
-
-    sonuc = evaluate_cv_match(
-        cv_text=cv,
-        position="Junior Python Developer",
-        job_description=ilan,
-        experience_level="Junior"
-    )
-
-    print("\nCV Sonucu\n")
-    print(json.dumps(sonuc, indent=2, ensure_ascii=False))
-
-    sorular = [
-        {
-            "question": "Python'da list ile tuple farkı nedir?",
-            "category": "Python"
-        },
-        {
-            "question": "REST API nedir?",
-            "category": "Backend"
-        }
-    ]
-
-    cevaplar = [
-        "Tuple değiştirilemez, list değiştirilebilir.",
-        "REST API HTTP üzerinden çalışan servis mimarisidir."
-    ]
-
-    sonuc2 = evaluate_interview_answers(
-        questions=sorular,
-        answers=cevaplar,
-        position="Junior Python Developer",
-        experience_level="Junior",
-        cv_text=cv
-    )
-
-    print("\nMülakat Sonucu\n")
-    print(json.dumps(sonuc2, indent=2, ensure_ascii=False))
+    print("SmartHire AI Evaluation Service")
