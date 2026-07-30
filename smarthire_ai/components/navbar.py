@@ -46,6 +46,11 @@ def render_navbar():
 
 def _render_sidebar():
     """Kalıcı sol navigasyon."""
+
+    # Giriş yapılmamışsa (landing/login/register) sidebar hiç gösterilmesin
+    if not st.session_state.get("is_authenticated", False):
+        return
+
     current_page = SessionManager.get_current_page()
     user = st.session_state.get("user", {})
 
