@@ -102,9 +102,22 @@ def render():
 
     st.divider()
 
-    if st.button(
-        "🚀 Mülakatı Başlat",
-        use_container_width=True,
-        type="primary"
-    ):
-        SessionManager.navigate_to("interview")
+    st.info(f"📋 **Aktif İş İlanı / Pozisyon:** {position}")
+
+    col_start, col_change = st.columns(2)
+
+    with col_start:
+        if st.button(
+            "🚀 Aynı İş İlanı İle Başlat",
+            use_container_width=True,
+            type="primary"
+        ):
+            SessionManager.navigate_to("interview")
+
+    with col_change:
+        if st.button(
+            "🔄 Yeni CV / İş İlanı Yükle",
+            use_container_width=True,
+            type="secondary"
+        ):
+            SessionManager.navigate_to("upload_cv")

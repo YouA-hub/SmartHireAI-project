@@ -99,6 +99,11 @@ def render():
                 SessionManager.navigate_to("upload_cv")
                 
         with st.container(border=True):
+            st.caption("📚 Eski Mülakatlar — Tamamladığın tüm mülakat geçmişini incele")
+            if st.button("Eski Mülakatları Aç ➡️", key="qa_view_history", use_container_width=True, type="secondary"):
+                SessionManager.navigate_to("interview_history")
+
+        with st.container(border=True):
             st.caption("📈 Sonuç Raporunu Gör — Detaylı performans analizi")
             if st.button("Sonuç Raporunu Aç ➡️", key="qa_view_results", use_container_width=True, type="secondary"):
                 SessionManager.navigate_to("result")
