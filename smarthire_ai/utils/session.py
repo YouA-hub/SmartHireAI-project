@@ -27,10 +27,10 @@ class SessionManager:
         "cv_confirm": "CV Onay",
         "ready": "Mülakat Hazırlık",
         "interview": "Mülakat",
-        "result": "Sonuç",
+        "result": "Mülakat Sonucu",
         "dev_plan": "Gelişim Planı",
-        "interview_history": "Geçmiş Mülakatlar",
-        "profile": "Profilim",
+        "interview_history": "Eski Mülakatlar",
+        "profile": "Profil",
         "settings": "Ayarlar"
     }
 
@@ -326,6 +326,8 @@ class SessionManager:
 
         if saved_cv_data:
             st.session_state.cv_data.update(saved_cv_data)
+            if "interview_history" in saved_cv_data and isinstance(saved_cv_data["interview_history"], list):
+                st.session_state.interview_history = saved_cv_data["interview_history"]
         else:
             st.session_state.cv_data = {
                 "file_name": None,
@@ -336,6 +338,7 @@ class SessionManager:
                 "english_level": None,
                 "skills": [],
             }
+            st.session_state.interview_history = []
 
         SessionManager.navigate_to("dashboard")
 
@@ -348,6 +351,7 @@ class SessionManager:
         """
         email = st.session_state.get("user", {}).get("email")
         if email:
+            st.session_state.cv_data["interview_history"] = st.session_state.interview_history
             user_store.save_cv_data(email, st.session_state.cv_data)
 
     @staticmethod
@@ -398,6 +402,9 @@ class SessionManager:
             "cv_match_score": interview_state["cv_match_score"],
             "question_count": interview_state["total_questions"],
         })
+
+        st.session_state.cv_data["interview_history"] = st.session_state.interview_history
+        SessionManager.persist_cv_data()
 
     @staticmethod
     def start_new_interview():

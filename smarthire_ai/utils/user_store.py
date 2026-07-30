@@ -38,6 +38,7 @@ _PERSISTED_CV_FIELDS = (
     "skills",
     "clean_text",
     "job_description",
+    "interview_history",
 )
 
 

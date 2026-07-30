@@ -164,6 +164,24 @@ def render():
                 for skill in existing_skills:
                     st.success(skill)
 
+            st.divider()
+
+            if st.button(
+                "🗑️ CV'yi Sil ve Yeni CV Yükle",
+                use_container_width=True,
+                key="delete_cv_button"
+            ):
+                st.session_state.cv_data.update({
+                    "file_name": None,
+                    "uploaded": False,
+                    "skills": [],
+                    "english_level": None,
+                    "clean_text": "",
+                })
+                SessionManager.persist_cv_data()
+                st.success("CV silindi. Şimdi yeni CV'ni yükleyebilirsin.")
+                st.rerun()
+
         else:
             st.info("Henüz CV yüklenmedi.")
 

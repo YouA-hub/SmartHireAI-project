@@ -8,6 +8,7 @@ kayıt ekranı.
 import streamlit as st
 
 from utils.session import SessionManager
+from utils import user_store
 from components.header import render_page_header
 
 
@@ -119,12 +120,31 @@ def render():
 
             target_position = custom_role.strip() if role == "Diğer" else role
 
+            # Bu e-posta ile daha önce bir hesap oluşturulmuş mu diye bak.
+            # Varsa tekrar "kayıt" oluşturmak yerine kullanıcıyı doğrudan
+            # giriş ekranına yönlendiriyoruz (yeni hesap oluşturmasına
+            # gerek yok, zaten hesabı var).
+            if user_store.load_cv_data(email) is not None:
+                st.session_state["auth_notice"] = (
+                    "Bu e-posta ile zaten bir hesabın var. "
+                    "Giriş yap ekranına yönlendirildiniz. 👇"
+                )
+                st.session_state["login_email"] = email
+                SessionManager.navigate_to("login")
+                return
+
             # Kayıt sırasında seçilen/yazılan hedef pozisyon, CV Yükle
             # sayfasında ön dolgu olarak kullanılsın. NOT: bu satır
             # login_user()'dan ÖNCE çalışmalı — login_user() içeride
             # navigate_to() -> st.rerun() çağırdığı için ondan sonraki
             # hiçbir kod çalışmıyordu.
             st.session_state.cv_data["position"] = target_position
+
+            # Bu hesabın diskte bir kaydının olduğunu hemen işaretle
+            # (CV henüz yüklenmemiş olsa bile), böylece bu e-posta ile
+            # tekrar "Hesap Oluştur" denendiğinde yukarıdaki kontrol
+            # bu kullanıcıyı tanıyıp giriş ekranına yönlendirebilsin.
+            user_store.save_cv_data(email, st.session_state.cv_data)
 
             SessionManager.login_user(
                 email=email,

@@ -18,16 +18,16 @@ st.caption, st.markdown (düz metin) kullanılmıştır.
 import streamlit as st
 from utils.session import SessionManager
 
-# (etiket, sayfa anahtarı, ikon) — sıra React NAV_ITEMS ile paraleldir
+# (etiket, sayfa anahtarı, ikon) — eski sidebar yapısı
 NAV_ITEMS = [
     ("Dashboard", "dashboard", "📊"),
     ("CV Yükle", "upload_cv", "📄"),
-    ("CV Onay", "cv_confirm", "✅"),
-    ("Hazırlık", "ready", "⚡"),
     ("Mülakat", "interview", "🎤"),
-    ("Sonuçlar", "result", "📈"),
-    ("Yol Haritası", "dev_plan", "🗺️"),
-    ("Geçmiş Mülakatlar", "interview_history", "📚"),
+    ("Mülakat Sonucu", "result", "📈"),
+    ("Eski Mülakatlar", "interview_history", "📚"),
+    ("Gelişim Planı", "dev_plan", "🗺️"),
+    ("Profil", "profile", "👤"),
+    ("Ayarlar", "settings", "⚙️"),
 ]
 
 
@@ -111,7 +111,7 @@ def _render_sidebar():
 
         st.divider()
 
-        # --- Kullanıcı kartı (React sidebar__user karşılığı) ---
+        # --- Kullanıcı kartı ---
         with st.container(border=True):
             col_avatar, col_info = st.columns([1, 3])
             with col_avatar:
@@ -119,24 +119,6 @@ def _render_sidebar():
             with col_info:
                 st.caption(f"**{user.get('name', 'Kullanıcı')}**")
                 st.caption(user.get("role", "Aday"))
-
-            col_profile, col_settings = st.columns(2)
-            with col_profile:
-                if st.button(
-                    "👤 Profil",
-                    key="sidebar_profile",
-                    use_container_width=True,
-                    type="primary" if current_page == "profile" else "secondary",
-                ):
-                    SessionManager.request_navigation("profile")
-            with col_settings:
-                if st.button(
-                    "⚙️ Ayarlar",
-                    key="sidebar_settings",
-                    use_container_width=True,
-                    type="primary" if current_page == "settings" else "secondary",
-                ):
-                    SessionManager.request_navigation("settings")
 
         if st.button("🚪 Çıkış Yap", key="sidebar_logout", use_container_width=True):
             SessionManager.request_logout()

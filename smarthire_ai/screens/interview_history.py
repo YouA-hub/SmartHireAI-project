@@ -18,9 +18,9 @@ def render():
     """Geçmiş Mülakatlar Sayfası"""
 
     render_page_header(
-        title="Geçmiş Mülakatlar 📚",
+        title="Eski Mülakatlar 📚",
         subtitle="Tamamladığın tüm mülakat simülasyonlarını buradan inceleyebilirsin.",
-        badge="Geçmiş",
+        badge="Eski Mülakatlar",
     )
 
     history = list(reversed(st.session_state.interview_history))

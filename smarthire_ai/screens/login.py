@@ -14,6 +14,10 @@ from components.header import render_page_header
 def render():
     """Giriş Sayfası"""
 
+    auth_notice = st.session_state.pop("auth_notice", None)
+    if auth_notice:
+        st.info(auth_notice)
+
     render_page_header(
         title="Tekrar Hoş Geldin 👋",
         subtitle="Hesabına giriş yap ve mülakat simülasyonuna devam et.",
