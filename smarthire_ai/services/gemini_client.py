@@ -5,13 +5,28 @@ Gemini Client
 from google import genai
 
 from config import (
-    GEMINI_API_KEY,
+    get_api_key,
     MODEL_NAME
 )
 
-client = genai.Client(
-    api_key=GEMINI_API_KEY
-)
+
+_client_cache = {}
+
+
+def get_client():
+    api_key = get_api_key()
+    if api_key not in _client_cache:
+        _client_cache[api_key] = genai.Client(api_key=api_key)
+    return _client_cache[api_key]
+
+
+class _ClientProxy:
+    @property
+    def models(self):
+        return get_client().models
+
+
+client = _ClientProxy()
 
 
 def generate(prompt: str) -> str:
