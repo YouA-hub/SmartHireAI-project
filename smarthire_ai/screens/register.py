@@ -106,6 +106,18 @@ def render():
                 st.error("Geçerli bir e-posta giriniz.")
                 return
 
+            # Bu e-posta ile daha önce bir hesap oluşturulmuş mu diye bak.
+            # Varsa tekrar "kayıt" oluşturmak yerine kullanıcıyı doğrudan
+            # giriş ekranına yönlendiriyoruz.
+            if user_store.load_cv_data(email) is not None:
+                st.session_state["auth_notice"] = (
+                    "Bu e-posta ile zaten bir hesabın var. "
+                    "Giriş Yap ekranına yönlendirildiniz. 👇"
+                )
+                st.session_state["login_email"] = email
+                SessionManager.navigate_to("login")
+                return
+
             if len(password) < 8:
                 st.error("Şifre en az 8 karakter olmalıdır.")
                 return
@@ -119,19 +131,6 @@ def render():
                 return
 
             target_position = custom_role.strip() if role == "Diğer" else role
-
-            # Bu e-posta ile daha önce bir hesap oluşturulmuş mu diye bak.
-            # Varsa tekrar "kayıt" oluşturmak yerine kullanıcıyı doğrudan
-            # giriş ekranına yönlendiriyoruz (yeni hesap oluşturmasına
-            # gerek yok, zaten hesabı var).
-            if user_store.load_cv_data(email) is not None:
-                st.session_state["auth_notice"] = (
-                    "Bu e-posta ile zaten bir hesabın var. "
-                    "Giriş yap ekranına yönlendirildiniz. 👇"
-                )
-                st.session_state["login_email"] = email
-                SessionManager.navigate_to("login")
-                return
 
             # Kayıt sırasında seçilen/yazılan hedef pozisyon, CV Yükle
             # sayfasında ön dolgu olarak kullanılsın. NOT: bu satır
