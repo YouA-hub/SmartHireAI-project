@@ -119,6 +119,8 @@ def render():
             "aşağıdaki skorlar yaklaşık (fallback) değerlerdir. Gerçek "
             "bir değerlendirme için lütfen daha sonra tekrar dene."
         )
+        if st.session_state.get("last_gemini_error"):
+            st.caption(f"ℹ️ Hata Detayı: {st.session_state.last_gemini_error}")
 
     pdf_bytes = generate_pdf_report(
         user_name=user_name,

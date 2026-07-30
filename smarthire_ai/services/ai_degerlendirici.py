@@ -176,11 +176,15 @@ def _call_gemini(
             return result
 
         except Exception as e:
-
+            err_msg = f"{type(e).__name__}: {e}"
             print("\n========== GEMINI ERROR ==========")
-            print(type(e).__name__)
-            print(e)
+            print(err_msg)
             print("==================================\n")
+            try:
+                import streamlit as st
+                st.session_state["last_gemini_error"] = err_msg
+            except Exception:
+                pass
 
             time.sleep(2)
 
