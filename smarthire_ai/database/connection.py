@@ -25,6 +25,7 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_recycle=300,
+    connect_args={"connect_timeout": 3},
 )
 
 # Veritabanında işlem yapabilmek için oturum (session) oluşturucu

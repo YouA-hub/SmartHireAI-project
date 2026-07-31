@@ -80,6 +80,7 @@ def render():
         cv_data["matched_skills"] = match_result["matched_skills"]
         cv_data["missing_skills"] = match_result["missing_skills"]
         cv_data["ai_cv_summary"] = match_result["summary"]
+        cv_data["cv_match_evaluated_by_ai"] = match_result.get("used_ai", False)
         user_id = st.session_state.user.get("id")
         if user_id:
             run_db_query(lambda db: queries.update_cv_analysis(
