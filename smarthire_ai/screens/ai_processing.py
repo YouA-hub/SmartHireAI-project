@@ -16,8 +16,11 @@ import time
 import streamlit as st
 
 from utils.session import SessionManager
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
 from services.ai_degerlendirici import evaluate_cv_match
+
 
 PROCESSING_STEPS = [
     ("CV içeriği taranıyor", 0.6),
@@ -77,7 +80,18 @@ def render():
         cv_data["matched_skills"] = match_result["matched_skills"]
         cv_data["missing_skills"] = match_result["missing_skills"]
         cv_data["ai_cv_summary"] = match_result["summary"]
-        cv_data["cv_match_evaluated_by_ai"] = match_result["used_ai"]
+        user_id = st.session_state.user.get("id")
+        if user_id:
+            run_db_query(lambda db: queries.update_cv_analysis(
+                db,
+                user_id=user_id,
+                uyum_orani=match_result["match_rate"],
+                eslesen_beceriler=match_result["matched_skills"],
+                eksik_beceriler=match_result["missing_skills"],
+                ai_cv_ozeti=match_result["summary"],
+                cv_uyum_ai_ile_mi=match_result["used_ai"],
+            ))
+        SessionManager.persist_cv_data()
 
         progress_bar.progress(
             (len(PROCESSING_STEPS) + 1) / total,
@@ -91,4 +105,4 @@ def render():
         )
 
     st.session_state.ai_processing_done = True
-    st.rerun()
+    st.rerun()

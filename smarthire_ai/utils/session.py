@@ -12,6 +12,8 @@ import uuid
 import streamlit as st
 
 from utils import user_store
+from database.connection import run_db_query
+import database.queries as queries
 
 
 class SessionManager:
@@ -53,10 +55,12 @@ class SessionManager:
 
         if "user" not in st.session_state:
             st.session_state.user = {
+                "id": None,
                 "name": "Senan Aliyev",
                 "email": "senan@example.com",
                 "avatar_initials": "SA"
             }
+
 
         if "cv_data" not in st.session_state:
             st.session_state.cv_data = {
@@ -279,6 +283,16 @@ class SessionManager:
 
         interview_state["is_completed"] = True
 
+        session_code = interview_state.get("session_id")
+        if session_code:
+            run_db_query(lambda db: queries.complete_interview_session(
+                db,
+                oturum_kodu=session_code,
+                erken_sonlandirildi_mi=True,
+                sonlandirma_nedeni=reason
+            ))
+
+
     @staticmethod
     def get_current_page():
         """Aktif sayfayı döndürür."""
@@ -302,56 +316,101 @@ class SessionManager:
     @staticmethod
     def login_user(
         email: str = "senan@example.com",
-        name: str = "Senan Aliyev"
+        name: str = "Senan Aliyev",
+        user_id: int = None
     ):
         """Kullanıcı girişi."""
 
         st.session_state.is_authenticated = True
 
+        # DB'den kullanıcı ID'sini sorgula (eğer dışarıdan verilmediyse)
+        if not user_id and email:
+            db_user = run_db_query(lambda db: queries.get_user_by_email(db, email))
+            if db_user:
+                user_id = db_user.id
+                name = db_user.ad_soyad or name
+
+        st.session_state.user["id"] = user_id
         st.session_state.user["name"] = name
         st.session_state.user["email"] = email
         st.session_state.user["avatar_initials"] = "".join(
             part[0].upper()
             for part in name.split()[:2]
-        )
+        ) or "SA"
 
-        # Bu hesap için diskte kayıtlı bir CV verisi var mı diye bak.
-        # Varsa yükle ki kullanıcı her girişte CV'sini yeniden
-        # yüklemek zorunda kalmasın. Yoksa (bu hesap ilk kez giriş
-        # yapıyor ya da başka bir hesaptan geçildi) temiz bir CV
-        # durumuyla başla — böylece önceki hesaptan kalma veri
-        # yanlışlıkla bu hesaba karışmaz.
-        saved_cv_data = user_store.load_cv_data(email)
+        # 1. Önce DB'den CV verisini çekmeyi dene
+        db_cv = run_db_query(lambda db: queries.get_cv_by_user(db, user_id)) if user_id else None
 
-        if saved_cv_data:
-            st.session_state.cv_data.update(saved_cv_data)
-            if "interview_history" in saved_cv_data and isinstance(saved_cv_data["interview_history"], list):
-                st.session_state.interview_history = saved_cv_data["interview_history"]
+        if db_cv:
+            st.session_state.cv_data.update({
+                "file_name": db_cv.dosya_adi,
+                "uploaded": db_cv.yuklendi_mi or False,
+                "position": db_cv.pozisyon or "",
+                "experience_level": db_cv.deneyim_seviyesi or "",
+                "match_rate": db_cv.uyum_orani,
+                "english_level": db_cv.ingilizce_seviyesi,
+                "skills": db_cv.beceriler or [],
+                "clean_text": db_cv.temiz_metin or "",
+                "job_description": db_cv.ilan_metni or "",
+                "matched_skills": db_cv.eslesen_beceriler or [],
+                "missing_skills": db_cv.eksik_beceriler or [],
+                "ai_cv_summary": db_cv.ai_cv_ozeti or "",
+                "cv_match_evaluated_by_ai": db_cv.cv_uyum_ai_ile_mi or False,
+            })
         else:
-            st.session_state.cv_data = {
-                "file_name": None,
-                "uploaded": False,
-                "position": "",
-                "experience_level": "",
-                "match_rate": None,
-                "english_level": None,
-                "skills": [],
-            }
-            st.session_state.interview_history = []
+            # 2. DB'de bulunamazsa veya DB offline ise user_store JSON deposuna fallback yap
+            saved_cv_data = user_store.load_cv_data(email)
+
+            if saved_cv_data:
+                st.session_state.cv_data.update(saved_cv_data)
+                if "interview_history" in saved_cv_data and isinstance(saved_cv_data["interview_history"], list):
+                    st.session_state.interview_history = saved_cv_data["interview_history"]
+            else:
+                st.session_state.cv_data = {
+                    "file_name": None,
+                    "uploaded": False,
+                    "position": "",
+                    "experience_level": "",
+                    "match_rate": None,
+                    "english_level": None,
+                    "skills": [],
+                }
+                st.session_state.interview_history = []
 
         SessionManager.navigate_to("dashboard")
 
     @staticmethod
     def persist_cv_data():
         """
-        Şu anki cv_data'yı, giriş yapmış kullanıcının hesabına kalıcı
-        olarak kaydeder. CV yüklendiğinde ya da pozisyon/ilan bilgisi
-        değiştiğinde çağrılmalı.
+        Şu anki cv_data'yı hem DB'ye hem de JSON fallback deposuna kaydeder.
         """
         email = st.session_state.get("user", {}).get("email")
+        user_id = st.session_state.get("user", {}).get("id")
+        cv_data = st.session_state.get("cv_data", {})
+
         if email:
             st.session_state.cv_data["interview_history"] = st.session_state.interview_history
             user_store.save_cv_data(email, st.session_state.cv_data)
+
+        if user_id:
+            run_db_query(lambda db: queries.save_cv(
+                db,
+                user_id=user_id,
+                dosya_adi=cv_data.get("file_name"),
+                yuklendi_mi=cv_data.get("uploaded", False),
+                temiz_metin=cv_data.get("clean_text"),
+                pozisyon=cv_data.get("position"),
+                deneyim_seviyesi=cv_data.get("experience_level"),
+                ilan_metni=cv_data.get("job_description"),
+                beceriler=cv_data.get("skills"),
+                ingilizce_seviyesi=cv_data.get("english_level"),
+                uyum_orani=cv_data.get("match_rate"),
+                eslesen_beceriler=cv_data.get("matched_skills"),
+                eksik_beceriler=cv_data.get("missing_skills"),
+                ai_cv_ozeti=cv_data.get("ai_cv_summary"),
+                cv_uyum_ai_ile_mi=cv_data.get("cv_match_evaluated_by_ai", False),
+            ))
+
 
     @staticmethod
     def logout_user():

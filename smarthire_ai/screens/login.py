@@ -8,6 +8,10 @@ giriş ekranı.
 import streamlit as st
 
 from utils.session import SessionManager
+from utils import user_store
+from utils.auth import verify_password
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
 
 
@@ -37,6 +41,7 @@ def render():
 
         email = st.text_input(
             "E-posta",
+            value=st.session_state.pop("login_email", ""),
             placeholder="sen@ornek.com",
             key="login_email"
         )
@@ -96,11 +101,32 @@ def render():
                 st.error("Şifre boş bırakılamaz.")
                 return
 
-            user_name = email.split("@")[0].capitalize()
+            clean_email = email.strip().lower()
 
-            SessionManager.login_user(
-                email=email,
-                name=user_name
-            )
+            # 1. DB'den kullanıcıyı çek
+            db_user = run_db_query(lambda db: queries.get_user_by_email(db, clean_email))
 
-            st.success("Giriş başarılı.")
+            if db_user:
+                if verify_password(password, db_user.sifre_hash):
+                    SessionManager.login_user(
+                        email=clean_email,
+                        name=db_user.ad_soyad,
+                        user_id=db_user.id
+                    )
+                    st.success("Giriş başarılı.")
+                else:
+                    st.error("E-posta veya şifre hatalı.")
+                return
+
+            # 2. Eğer DB'de yoksa veya DB offline ise fallback kontrolü yap
+            saved_store = user_store.load_cv_data(clean_email)
+            if saved_store is not None:
+                user_name = clean_email.split("@")[0].capitalize()
+                SessionManager.login_user(
+                    email=clean_email,
+                    name=user_name
+                )
+                st.success("Giriş başarılı.")
+                return
+
+            st.error("E-posta veya şifre hatalı.")

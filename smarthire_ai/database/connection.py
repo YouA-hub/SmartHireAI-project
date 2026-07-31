@@ -15,6 +15,7 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://postgres:@db.gehcgymeopafoovquafs.supabase.co:5432/postgres",
 )
+print("DATABASE_URL:", DATABASE_URL)
 
 # Veritabanı motorunu oluştur.
 # pool_pre_ping: Supabase gibi bir süre işlem yapılmayınca bağlantıyı
@@ -39,3 +40,25 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def run_db_query(func, default=None):
+    """
+    Veritabanı işlemlerini güvenli bir şekilde çalıştırır.
+    Veritabanına ulaşılamazsa veya hata oluşursa çökmek yerine
+    log üretip `default` değerini döndürür (fallback mekanizması).
+    """
+    try:
+        db = SessionLocal()
+        try:
+            res = func(db)
+            return res
+        except Exception as e:
+            db.rollback()
+            print(f"[DB Warning] Query execution failed: {e}")
+            return default
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"[DB Warning] DB connection failed: {e}")
+        return default

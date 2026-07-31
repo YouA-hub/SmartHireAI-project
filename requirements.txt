@@ -3,5 +3,6 @@ pdfplumber
 python-dotenv
 google-genai
 SQLAlchemy
-python-dotenv
 psycopg2-binary
+bcrypt
+passlib

@@ -9,7 +9,11 @@ import streamlit as st
 
 from utils.session import SessionManager
 from utils import user_store
+from utils.auth import hash_password
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
+
 
 
 def render():
@@ -106,15 +110,18 @@ def render():
                 st.error("Geçerli bir e-posta giriniz.")
                 return
 
-            # Bu e-posta ile daha önce bir hesap oluşturulmuş mu diye bak.
-            # Varsa tekrar "kayıt" oluşturmak yerine kullanıcıyı doğrudan
-            # giriş ekranına yönlendiriyoruz.
-            if user_store.load_cv_data(email) is not None:
+            clean_email = email.strip().lower()
+
+            # Bu e-posta ile daha önce bir hesap oluşturulmuş mu diye bak (DB veya JSON store)
+            existing_db_user = run_db_query(lambda db: queries.get_user_by_email(db, clean_email))
+            existing_store_user = user_store.load_cv_data(clean_email)
+
+            if existing_db_user is not None or existing_store_user is not None:
                 st.session_state["auth_notice"] = (
                     "Bu e-posta ile zaten bir hesabın var. "
                     "Giriş Yap ekranına yönlendirildiniz. 👇"
                 )
-                st.session_state["login_email"] = email
+                st.session_state["login_email"] = clean_email
                 SessionManager.navigate_to("login")
                 return
 
@@ -131,21 +138,26 @@ def render():
                 return
 
             target_position = custom_role.strip() if role == "Diğer" else role
-
-            # Kayıt sırasında seçilen/yazılan hedef pozisyon, CV Yükle
-            # sayfasında ön dolgu olarak kullanılsın. NOT: bu satır
-            # login_user()'dan ÖNCE çalışmalı — login_user() içeride
-            # navigate_to() -> st.rerun() çağırdığı için ondan sonraki
-            # hiçbir kod çalışmıyordu.
             st.session_state.cv_data["position"] = target_position
 
-            # Bu hesabın diskte bir kaydının olduğunu hemen işaretle
-            # (CV henüz yüklenmemiş olsa bile), böylece bu e-posta ile
-            # tekrar "Hesap Oluştur" denendiğinde yukarıdaki kontrol
-            # bu kullanıcıyı tanıyıp giriş ekranına yönlendirebilsin.
-            user_store.save_cv_data(email, st.session_state.cv_data)
+            # 1. Şifreyi bcrypt ile hashle
+            sifre_hash = hash_password(password)
+
+            # 2. DB'de yeni kullanıcı oluştur
+            new_user = run_db_query(lambda db: queries.create_user(
+                db,
+                ad_soyad=full_name.strip(),
+                email=clean_email,
+                sifre_hash=sifre_hash,
+                hedef_pozisyon=target_position,
+                kullanim_kosullari_onayi=accept_terms
+            ))
+
+            # 3. Fallback deposuna da kaydet
+            user_store.save_cv_data(clean_email, st.session_state.cv_data)
 
             SessionManager.login_user(
-                email=email,
-                name=full_name
+                email=clean_email,
+                name=full_name.strip(),
+                user_id=new_user.id if new_user else None
             )

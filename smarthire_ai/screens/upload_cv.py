@@ -11,8 +11,11 @@ import tempfile
 import streamlit as st
 
 from utils.session import SessionManager
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
 from components.cards import render_info_card
+
 
 
 def parse_uploaded_cv(uploaded_file):
@@ -178,9 +181,13 @@ def render():
                     "english_level": None,
                     "clean_text": "",
                 })
+                user_id = st.session_state.user.get("id")
+                if user_id:
+                    run_db_query(lambda db: queries.delete_cv(db, user_id))
                 SessionManager.persist_cv_data()
                 st.success("CV silindi. Şimdi yeni CV'ni yükleyebilirsin.")
                 st.rerun()
+
 
         else:
             st.info("Henüz CV yüklenmedi.")

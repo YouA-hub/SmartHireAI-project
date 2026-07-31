@@ -1,19 +1,11 @@
-"""
-SmartHire AI - Live Interview Screen
-
-Canli mulakat ekrani: AI tarafindan uretilen sorular tek tek sorulur,
-her soru icin 90 saniyelik gorsel sayac gosterilir, cevaplar toplanir
-ve son soru cevaplandiginda evaluate_interview_answers() ile Gemini
-uzerinden degerlendirilip sonuc utils.session.interview_state icine
-yazilir (bkz. screens/result.py).
-"""
-
 import os
 
 import streamlit as st
 import streamlit.components.v1 as components
 
 from utils.session import SessionManager
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
 from components.timer import render_interview_timer
 from services.ai_degerlendirici import (
@@ -23,17 +15,6 @@ from services.ai_degerlendirici import (
 )
 
 # --- Sekme/Pencere/Site Değişikliği Algılayıcı (çift yönlü bileşen) -------
-#
-# ÖNEMLİ: Eski yaklaşım (components.html + window.parent.location.href ile
-# sayfayı ?left_interview=1 parametresiyle yeniden yükleme) ÇALIŞMIYORDU,
-# çünkü Streamlit'in components.html iframe'i "sandbox"lı olup üst pencereyi
-# (top-level) yönlendirme izni (allow-top-navigation) içermiyor; tarayıcı bu
-# yönlendirmeyi sessizce engelliyordu.
-#
-# Bunun yerine burada Streamlit'in resmi çift-yönlü bileşen protokolünü
-# (postMessage tabanlı — sandbox tarafından ASLA engellenmez) kendimiz,
-# harici bir pip paketine ihtiyaç duymadan uyguluyoruz. Frontend kodu:
-# components/tab_switch_frontend/index.html
 _TAB_SWITCH_FRONTEND_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "components",
@@ -47,36 +28,17 @@ _tab_switch_component = components.declare_component(
 
 
 def _detect_tab_switch() -> bool:
-    """
-    Gömülü bileşeni render eder ve kullanıcının mülakat sırasında başka
-    bir sekmeye/pencereye/siteye geçip geçmediğini döndürür.
-
-    Tarayıcı tarafında visibilitychange/blur/pagehide event'lerinden biri
-    tetiklendiğinde, bileşen bunu postMessage ile ANINDA Python'a
-    (bu fonksiyonun dönüş değeri olarak) bildirir — bu da normal bir
-    widget değeri değişikliği gibi otomatik olarak bir Streamlit
-    rerun'ı tetikler.
-    """
-
     left = _tab_switch_component(key="tab_switch_detector", default=False)
     return bool(left)
 
 
 def _terminate_interview_due_to_tab_switch():
-    """Sekme/pencere/site değişikliği tespit edildiğinde mülakatı erken ve
-    kalıcı biçimde sonlandırır; kullanıcı geri dönüp devam edemez."""
-
     SessionManager._terminate_abandoned_interview(reason="tab_switch")
-
-    # is_completed artik True oldugu icin navigate_to("interview")
-    # otomatik olarak "result" sayfasina yonlendirir.
     SessionManager.navigate_to("interview")
 
 
 def _ensure_questions_generated():
-    """Ilk girişte (veya sorular herhangi bir sebeple kayipsa) AI sorularini
-    uretir ve session_state'e yazar. Ayni oturum icinde tekrar tekrar
-    Gemini'ye istek atmamak icin bir kere uretilir."""
+    """Ilk girişte AI sorularini uretir, session_state ve DB'ye yazar."""
 
     if st.session_state.get("interview_questions"):
         return
@@ -95,12 +57,39 @@ def _ensure_questions_generated():
     st.session_state.interview_questions = questions
     st.session_state.interview_questions_used_ai = result.get("used_ai", False)
 
-    st.session_state.interview_state["total_questions"] = len(questions)
+    interview_state = st.session_state.interview_state
+    interview_state["total_questions"] = len(questions)
+
+    # DB'ye mülakat oturumunu ve sorularını kaydet
+    user_id = st.session_state.user.get("id")
+    session_code = interview_state["session_id"]
+    if user_id:
+        db_oturum = run_db_query(lambda db: queries.create_interview_session(
+            db,
+            user_id=user_id,
+            oturum_kodu=session_code,
+            pozisyon=cv_data.get("position"),
+            deneyim_seviyesi=cv_data.get("experience_level"),
+            toplam_soru_sayisi=len(questions),
+        ))
+        if db_oturum:
+            interview_state["db_session_id"] = db_oturum.id
+            for i, q in enumerate(questions):
+                db_q = run_db_query(lambda db, idx=i, q_dict=q: queries.save_question(
+                    db,
+                    user_id=user_id,
+                    oturum_id=db_oturum.id,
+                    soru_metni=q_dict.get("question", ""),
+                    kategori=q_dict.get("category"),
+                    soru_sirasi=idx + 1,
+                ))
+                if db_q:
+                    q["db_question_id"] = db_q.id
 
 
 def _finish_interview():
     """Son cevap da alindiktan sonra tum mulakati Gemini ile degerlendirir,
-    sonuclari interview_state icine yazar ve sonuc sayfasina yonlendirir."""
+    sonuclari interview_state ve DB'ye yazar."""
 
     cv_data = st.session_state.cv_data
     interview_state = st.session_state.interview_state
@@ -116,8 +105,8 @@ def _finish_interview():
     )
 
     cv_match = {
-    "match_rate": cv_data.get("match_rate") or 70,
-}
+        "match_rate": cv_data.get("match_rate") or 70,
+    }
 
     summary = build_result_summary(
         interview_result=interview_result,
@@ -138,10 +127,48 @@ def _finish_interview():
     interview_state["ai_feedback"] = summary["ai_feedback"]
     interview_state["evaluated_by_ai"] = interview_result.get("used_ai", False)
 
-    SessionManager.complete_current_interview()
+    # DB işlemleri: Soruların puan/geri bildirimlerini ve nihai sonuç özetini kaydet
+    user_id = st.session_state.user.get("id")
+    session_code = interview_state.get("session_id")
 
-    # is_completed artik True oldugu icin navigate_to("interview")
-    # otomatik olarak "result" sayfasina yonlendirir.
+    for i, q_score in enumerate(summary.get("question_scores", [])):
+        if i < len(questions):
+            q_id = questions[i].get("db_question_id")
+            if q_id:
+                run_db_query(lambda db, qid=q_id, qs=q_score, ans=answers[i] if i < len(answers) else "": queries.save_answer_and_score(
+                    db,
+                    question_id=qid,
+                    cevap=ans,
+                    puan=qs.get("final_score"),
+                    geri_bildirim=qs.get("feedback"),
+                    icerik_puani=qs.get("content_score"),
+                    aciklik_puani=qs.get("clarity_score"),
+                    iliskililik_puani=qs.get("relevance_score"),
+                ))
+
+    db_oturum = run_db_query(lambda db: queries.complete_interview_session(db, oturum_kodu=session_code))
+    oturum_id = db_oturum.id if db_oturum else interview_state.get("db_session_id")
+
+    if user_id and oturum_id:
+        run_db_query(lambda db: queries.save_result(
+            db,
+            user_id=user_id,
+            oturum_id=oturum_id,
+            ise_alim_orani=summary.get("hireability"),
+            hazirlik_skoru=summary.get("interview_score"),
+            cv_uyum_skoru=summary.get("cv_match_score"),
+            iletisim_skoru=summary.get("communication_score"),
+            kategori_skorlari=interview_state.get("category_scores"),
+            guclu_yonler=summary.get("strengths"),
+            gelisim_alanlari=summary.get("improvement_areas"),
+            dil_tutarliligi=summary.get("language_consistency"),
+            ai_geri_bildirimi=summary.get("ai_feedback"),
+            ai_ile_degerlendirildi_mi=interview_result.get("used_ai", False),
+        ))
+
+    SessionManager.complete_current_interview()
+    SessionManager.record_completed_interview()
+
     SessionManager.navigate_to("interview")
 
 
@@ -164,9 +191,6 @@ def render():
         badge="Canlı Oturum",
     )
 
-    # Sekme/pencere/site değişikliği tespit edildiyse mülakatı hemen
-    # sonlandır ve sonuç sayfasına yönlendir; sorunun geri kalanını render
-    # etmeye devam etme.
     if _detect_tab_switch():
         _terminate_interview_due_to_tab_switch()
         return
@@ -201,6 +225,15 @@ def render():
     if st.button(button_label, use_container_width=True, type="primary"):
 
         interview_state["answers"].append(answer)
+
+        # DB'ye o anki sorunun cevabını kaydet
+        q_id = current_question.get("db_question_id")
+        if q_id:
+            run_db_query(lambda db, qid=q_id, ans=answer: queries.save_answer_and_score(
+                db,
+                question_id=qid,
+                cevap=ans
+            ))
 
         if is_last_question:
             with st.spinner("Cevapların değerlendiriliyor..."):

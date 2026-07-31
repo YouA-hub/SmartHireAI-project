@@ -10,6 +10,8 @@ Hiçbir render_html / unsafe_allow_html / inline HTML string İÇERMEZ.
 import streamlit as st
 
 from utils.session import SessionManager
+from database.connection import run_db_query
+import database.queries as queries
 from components.header import render_page_header
 
 
@@ -21,6 +23,15 @@ def _init_settings():
             "interview_difficulty": "Mid Level (2-5 Yıl)",
             "language": "Türkçe",
         }
+
+    user_id = st.session_state.user.get("id")
+    if user_id:
+        db_ayar = run_db_query(lambda db: queries.get_or_create_settings(db, user_id))
+        if db_ayar:
+            st.session_state.app_settings["email_notifications"] = db_ayar.email_bildirimleri
+            st.session_state.app_settings["reminder_notifications"] = db_ayar.hatirlatma_bildirimleri
+            st.session_state.app_settings["interview_difficulty"] = db_ayar.varsayilan_deneyim_seviyesi
+            st.session_state.app_settings["language"] = db_ayar.uygulama_dili
 
 
 def render():
@@ -53,14 +64,8 @@ def render():
         difficulty = st.selectbox(
             "Varsayılan Deneyim Seviyesi",
             ["Junior", "Mid Level (2-5 Yıl)", "Senior", "Lead"],
-            index=[
-                "Junior",
-                "Mid Level (2-5 Yıl)",
-                "Senior",
-                "Lead",
-            ].index(settings["interview_difficulty"])
-            if settings["interview_difficulty"]
-            in ["Junior", "Mid Level (2-5 Yıl)", "Senior", "Lead"]
+            index=["Junior", "Mid Level (2-5 Yıl)", "Senior", "Lead"].index(settings["interview_difficulty"])
+            if settings["interview_difficulty"] in ["Junior", "Mid Level (2-5 Yıl)", "Senior", "Lead"]
             else 1,
         )
 
@@ -70,7 +75,9 @@ def render():
         language = st.selectbox(
             "Dil",
             ["Türkçe", "English"],
-            index=["Türkçe", "English"].index(settings["language"]),
+            index=["Türkçe", "English"].index(settings["language"])
+            if settings["language"] in ["Türkçe", "English"]
+            else 0,
         )
 
         submitted = st.form_submit_button(
@@ -83,6 +90,17 @@ def render():
             settings["interview_difficulty"] = difficulty
             settings["language"] = language
 
+            user_id = st.session_state.user.get("id")
+            if user_id:
+                run_db_query(lambda db: queries.update_settings(
+                    db,
+                    user_id=user_id,
+                    email_bildirimleri=email_notif,
+                    hatirlatma_bildirimleri=reminder_notif,
+                    varsayilan_deneyim_seviyesi=difficulty,
+                    uygulama_dili=language,
+                ))
+
             st.success("Ayarların kaydedildi.")
 
     st.divider()
@@ -91,3 +109,4 @@ def render():
 
     if st.button("🚪 Çıkış Yap", use_container_width=True):
         SessionManager.logout_user()
+
