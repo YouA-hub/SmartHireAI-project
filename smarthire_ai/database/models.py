@@ -1,4 +1,3 @@
-print("1. TEST: Python dosyayı okumaya başladı...")
 # database/models.py
 from sqlalchemy import (
     Column,

@@ -128,7 +128,11 @@ def render():
         date_str=date.today().strftime("%d.%m.%Y"),
         overall_score=readiness_score,
         hireability=hireability_rate,
-        cv_match=cv_match_score
+        cv_match=cv_match_score,
+        category_scores=category_scores,
+        strengths=strengths,
+        improvement_areas=improvement_areas,
+        ai_feedback=ai_feedback,
     )
 
     st.download_button(
