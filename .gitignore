@@ -27,3 +27,4 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+smarthire_ai/user_store/
